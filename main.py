@@ -43,9 +43,31 @@ class Demo:
 
     def actions_handler(self):
         """Program actions in the main loop."""
+
+        # self.is_move_done = {
+        #     0: self.game.up,
+        #     1: self.game.down,
+        #     2: self.game.right,
+        #     3: self.game.left,
+        # }.get(np.random.randint(4))()
+
         if self.is_move_done:
             self.game.generate_tile(self.game.choose_tile())
         if self.game.is_game_lost():
+            from pprint import pprint
+            print('Game lost!')
+            print()
+            print(self.game.matrix)
+            print()
+            print(f'{self.game.stats.score = }')
+            print()
+            print(f'{self.game.stats.moves_idle = }')
+            print()
+            pprint(self.game.stats.move)
+            print()
+            print(f'Total moves = {sum(self.game.stats.move.values()) + self.game.stats.moves_idle}')
+            print()
+            pprint(self.game.stats.merge)
             self.is_running = False
 
     def graphics_handler(self):
