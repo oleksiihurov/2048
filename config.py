@@ -13,7 +13,7 @@ class GRID:
     WIN_TILE = 2048
 
     class COLOR:
-        BACKGROUND = '#92877d'
+        BACKGROUND = '#bbada0'
 
 
 @dataclass
@@ -36,8 +36,8 @@ class TILE:
 
     class COLOR:
         BACKGROUND = {
-            0: '#9e948a',  # empty tile
-            1: None,
+            0: '#cdc0b4',  # empty tile
+            1: None,  # impossible tile
             2: '#eee4da',
             4: '#ede0c8',
             8: '#f2b179',
@@ -49,15 +49,15 @@ class TILE:
             512: '#edc850',
             1024: '#edc53f',
             2048: '#edc22e',
-            4096: '#eee4da',
-            8192: '#edc22e',
-            16384: '#f2b179',
-            32768: '#f59563',
-            65536: '#f67c5f',
+            4096: '#3c3a32',
+            8192: '#3c3a32',
+            16384: '#3c3a32',
+            32768: '#3c3a32',
+            65536: '#3c3a32',
         }
         FOREGROUND = {
-            0: None,
-            1: None,
+            0: None,  # empty tile
+            1: None,  # impossible tile
             2: '#776e65',
             4: '#776e65',
             8: '#f9f6f2',
@@ -69,10 +69,10 @@ class TILE:
             512: '#f9f6f2',
             1024: '#f9f6f2',
             2048: '#f9f6f2',
-            4096: '#776e65',
+            4096: '#f9f6f2',
             8192: '#f9f6f2',
-            16384: '#776e65',
-            32768: '#776e65',
+            16384: '#f9f6f2',
+            32768: '#f9f6f2',
             65536: '#f9f6f2',
         }
 

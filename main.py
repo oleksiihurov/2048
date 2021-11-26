@@ -1,3 +1,7 @@
+"""
+https://2048game.com
+"""
+
 # Project imports
 import config as c
 from game import Game

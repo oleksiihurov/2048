@@ -72,6 +72,7 @@ class Game:
         self.stats = Stats()
 
         self.init_matrix()
+        # self.test_matrix()
 
     # --- Matrix initialization methods ---------------------------------------
 
@@ -92,6 +93,14 @@ class Game:
         self.clear_matrix()
         self.generate_tile()
         self.generate_tile()
+
+    def test_matrix(self):
+        self.clear_matrix()
+        max_power = self.rows * self.cols - 1
+        test_list = [2 << i for i in range(max_power)]
+        test_list = test_list[::-1]
+        test_list = test_list + [0]
+        self.matrix = np.array(test_list).reshape((self.rows, self.cols))
 
     def generate_tile(self, tile=2):
         """
