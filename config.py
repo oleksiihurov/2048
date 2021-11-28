@@ -31,30 +31,31 @@ class TILE:
     # size in pixels between Tiles
     PADDING = int(SIZE * _PADDING_FRACTION)
 
+    COLOR_DEFAULT = '#000000'
+    COLOR = {
+        0: '#cdc0b4',  # empty tile
+        2: '#eee4da',
+        4: '#ede0c8',
+        8: '#f2b179',
+        16: '#f59563',
+        32: '#f67c5f',
+        64: '#f65e3b',
+        128: '#edcf72',
+        256: '#edcc61',
+        512: '#edc850',
+        1024: '#edc53f',
+        2048: '#edc22e',
+        4096: '#3c3a32',
+        8192: '#3c3a32',
+        16384: '#3c3a32',
+        32768: '#3c3a32',
+        65536: '#3c3a32',
+    }
+
     @dataclass
-    class COLOR:
-        BACKGROUND_DEFAULT = '#000000'
-        BACKGROUND = {
-            0: '#cdc0b4',  # empty tile
-            2: '#eee4da',
-            4: '#ede0c8',
-            8: '#f2b179',
-            16: '#f59563',
-            32: '#f67c5f',
-            64: '#f65e3b',
-            128: '#edcf72',
-            256: '#edcc61',
-            512: '#edc850',
-            1024: '#edc53f',
-            2048: '#edc22e',
-            4096: '#3c3a32',
-            8192: '#3c3a32',
-            16384: '#3c3a32',
-            32768: '#3c3a32',
-            65536: '#3c3a32',
-        }
-        FOREGROUND_DEFAULT = '#ffffff'
-        FOREGROUND = {
+    class FONT:
+        COLOR_DEFAULT = '#ffffff'
+        COLOR = {
             0: '#ffffff',  # empty tile
             2: '#776e65',
             4: '#776e65',
@@ -73,6 +74,26 @@ class TILE:
             32768: '#f9f6f2',
             65536: '#f9f6f2',
         }
+        SIZE_DEFAULT = 25
+        SIZE = {
+            0: 65,  # empty tile
+            2: 65,
+            4: 65,
+            8: 65,
+            16: 65,
+            32: 65,
+            64: 65,
+            128: 55,
+            256: 55,
+            512: 55,
+            1024: 45,
+            2048: 45,
+            4096: 45,
+            8192: 45,
+            16384: 35,
+            32768: 35,
+            65536: 35,
+        }
 
 
 @dataclass
@@ -85,9 +106,7 @@ class GRID:
     WIDTH = GAME.COLS * TILE.SIZE + (GAME.COLS + 1) * TILE.PADDING
     HEIGHT = GAME.ROWS * TILE.SIZE + (GAME.ROWS + 1) * TILE.PADDING
 
-    @dataclass
-    class COLOR:
-        BACKGROUND = '#bbada0'
+    COLOR = '#bbada0'
 
 
 @dataclass

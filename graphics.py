@@ -31,7 +31,7 @@ class Graphics:
 
     def draw_background(self):
         """Drawing background to the screen surface."""
-        self.screen.fill(pg.Color(c.GRID.COLOR.BACKGROUND))
+        self.screen.fill(pg.Color(c.GRID.COLOR))
 
     def draw_grid(self, matrix: np.ndarray):
         """Drawing figures on the screen."""
@@ -49,29 +49,35 @@ class Graphics:
                 # pg.gfxdraw.box(
                 #     self.screen,
                 #     tile_rect,
-                #     pg.Color(c.TILE.COLOR.BACKGROUND.get(
+                #     pg.Color(c.TILE.COLOR.get(
                 #         matrix[y, x],
-                #         c.TILE.COLOR.BACKGROUND_DEFAULT
+                #         c.TILE.COLOR_DEFAULT
                 #     ))
                 # )
                 pg.draw.rect(
                     surface=self.screen,
-                    color=c.TILE.COLOR.BACKGROUND.get(
+                    color=c.TILE.COLOR.get(
                         matrix[y, x],
-                        c.TILE.COLOR.BACKGROUND_DEFAULT
+                        c.TILE.COLOR_DEFAULT
                     ),
                     rect=tile_rect,
                     border_radius=3
                 )
 
                 if matrix[y, x]:
-                    font = pg.font.Font(path.join('assets', 'ClearSans-Bold.ttf'), 65)
+                    font = pg.font.Font(
+                        path.join('assets', 'ClearSans-Bold.ttf'),
+                        c.TILE.FONT.SIZE.get(
+                            matrix[y, x],
+                            c.TILE.FONT.SIZE_DEFAULT
+                        )
+                    )
                     text = font.render(
                         str(matrix[y, x]),
                         True,
-                        pg.Color(c.TILE.COLOR.FOREGROUND.get(
+                        pg.Color(c.TILE.FONT.COLOR.get(
                             matrix[y, x],
-                            c.TILE.COLOR.FOREGROUND_DEFAULT
+                            c.TILE.FONT.COLOR_DEFAULT
                         ))
                     )
                     text_rect = text.get_rect()
