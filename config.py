@@ -8,8 +8,8 @@ class GRID:
     Set of constants for game's Grid.
     """
 
-    ROWS = 4  # min = 2; max = 10
-    COLS = 4  # min = 2; max = 10
+    ROWS = 4  # min = 3; max = 20
+    COLS = 4  # min = 3; max = 20
     WIN_TILE = 2048
 
     class COLOR:
@@ -22,17 +22,17 @@ class TILE:
     Set of constants for particular grid's Tile.
     """
 
-    # base size in pixels for the smallest grid 2x2
-    _BASE_SIZE = 123
+    # base size in pixels for the smallest grid 3x3
+    _BASE_SIZE = 130
     # multiplication factor for every larger grid
-    _SIZE_FACTOR = 0.9
+    _SIZE_FACTOR = 0.95
     # size in pixels based on number of Grid's rows/cols
-    SIZE = int(_BASE_SIZE * _SIZE_FACTOR ** (max(GRID.ROWS, GRID.COLS) - 2))
+    SIZE = int(_BASE_SIZE * _SIZE_FACTOR ** (max(GRID.ROWS, GRID.COLS) - 3))
 
     # multiplication factor from Tile's size
-    _PADDING_FACTOR = 0.12
+    _PADDING_MULTIPLIER = 0.12
     # size in pixels between Tiles
-    PADDING = int(_PADDING_FACTOR * SIZE)
+    PADDING = int(SIZE * _PADDING_MULTIPLIER)
 
     class COLOR:
         BACKGROUND = {
@@ -85,14 +85,15 @@ class SCREEN:
     _GRID_WIDTH = GRID.COLS * TILE.SIZE + (GRID.COLS + 1) * TILE.PADDING
     _GRID_HEIGHT = GRID.ROWS * TILE.SIZE + (GRID.ROWS + 1) * TILE.PADDING
 
+    # actual display fullscreen resolution do not considering OS scale and layout:
+    # thanks to solution by
+    # https://gamedev.stackexchange.com/questions/105750/pygame-fullsreen-display-issue
+    import ctypes
+    ctypes.windll.user32.SetProcessDPIAware()
+
     FULL_SCREEN_MODE = False
 
     if FULL_SCREEN_MODE:
-        # actual display fullscreen resolution do not considering OS scale and layout:
-        # thanks to solution by
-        # https://gamedev.stackexchange.com/questions/105750/pygame-fullsreen-display-issue
-        import ctypes
-        ctypes.windll.user32.SetProcessDPIAware()
         RESOLUTION = (
             ctypes.windll.user32.GetSystemMetrics(0),
             ctypes.windll.user32.GetSystemMetrics(1)
@@ -105,6 +106,7 @@ class SCREEN:
             max(300, min(1280, _GRID_WIDTH)),
             max(200, min(760, _GRID_HEIGHT))
         )
+
         # or manually set "window size":
         # RESOLUTION = (800, 600)
 
