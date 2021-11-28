@@ -3,41 +3,39 @@ from dataclasses import dataclass
 
 
 @dataclass
-class GRID:
+class GAME:
     """
-    Set of constants for game's Grid.
+    Set of constants for Game.
     """
 
-    ROWS = 4  # min = 3; max = 20
-    COLS = 4  # min = 3; max = 20
+    ROWS = 4  # 3 <= ROWS <= 20
+    COLS = 4  # 3 <= COLS <= 20
     WIN_TILE = 2048
-
-    class COLOR:
-        BACKGROUND = '#bbada0'
 
 
 @dataclass
 class TILE:
     """
-    Set of constants for particular grid's Tile.
+    Set of constants for particular Tile of Grid.
     """
 
     # base size in pixels for the smallest grid 3x3
-    _BASE_SIZE = 130
+    _SIZE_3x3 = 130
     # multiplication factor for every larger grid
     _SIZE_FACTOR = 0.95
     # size in pixels based on number of Grid's rows/cols
-    SIZE = int(_BASE_SIZE * _SIZE_FACTOR ** (max(GRID.ROWS, GRID.COLS) - 3))
+    SIZE = int(_SIZE_3x3 * _SIZE_FACTOR ** (max(GAME.ROWS, GAME.COLS) - 3))
 
-    # multiplication factor from Tile's size
-    _PADDING_MULTIPLIER = 0.12
+    # fraction from Tile's size
+    _PADDING_FRACTION = 0.12
     # size in pixels between Tiles
-    PADDING = int(SIZE * _PADDING_MULTIPLIER)
+    PADDING = int(SIZE * _PADDING_FRACTION)
 
+    @dataclass
     class COLOR:
+        BACKGROUND_DEFAULT = '#000000'
         BACKGROUND = {
             0: '#cdc0b4',  # empty tile
-            1: None,  # impossible tile
             2: '#eee4da',
             4: '#ede0c8',
             8: '#f2b179',
@@ -55,9 +53,9 @@ class TILE:
             32768: '#3c3a32',
             65536: '#3c3a32',
         }
+        FOREGROUND_DEFAULT = '#ffffff'
         FOREGROUND = {
-            0: None,  # empty tile
-            1: None,  # impossible tile
+            0: '#ffffff',  # empty tile
             2: '#776e65',
             4: '#776e65',
             8: '#f9f6f2',
@@ -78,44 +76,53 @@ class TILE:
 
 
 @dataclass
+class GRID:
+    """
+    Set of constants for Grid.
+    """
+
+    # size of the Grid in pixels
+    WIDTH = GAME.COLS * TILE.SIZE + (GAME.COLS + 1) * TILE.PADDING
+    HEIGHT = GAME.ROWS * TILE.SIZE + (GAME.ROWS + 1) * TILE.PADDING
+
+    @dataclass
+    class COLOR:
+        BACKGROUND = '#bbada0'
+
+
+@dataclass
 class SCREEN:
     """Set of constants for Screen."""
 
-    # size of the Grid in pixels
-    _GRID_WIDTH = GRID.COLS * TILE.SIZE + (GRID.COLS + 1) * TILE.PADDING
-    _GRID_HEIGHT = GRID.ROWS * TILE.SIZE + (GRID.ROWS + 1) * TILE.PADDING
+    FULL_SCREEN_MODE = False
 
     # actual display fullscreen resolution do not considering OS scale and layout:
     # thanks to solution by
     # https://gamedev.stackexchange.com/questions/105750/pygame-fullsreen-display-issue
     import ctypes
     ctypes.windll.user32.SetProcessDPIAware()
-
-    FULL_SCREEN_MODE = False
+    MONITOR_WIDTH = ctypes.windll.user32.GetSystemMetrics(0)
+    MONITOR_HEIGHT = ctypes.windll.user32.GetSystemMetrics(1)
 
     if FULL_SCREEN_MODE:
         RESOLUTION = (
-            ctypes.windll.user32.GetSystemMetrics(0),
-            ctypes.windll.user32.GetSystemMetrics(1)
+            MONITOR_WIDTH,
+            MONITOR_HEIGHT
         )
-    else:
-        # calculating "window size" based on ROWS & COLS in ranges:
-        # 300 <= width (px) <= 1280
-        # 200 <= height (px) <= 760
+    else:  # window size
         RESOLUTION = (
-            max(300, min(1280, _GRID_WIDTH)),
-            max(200, min(760, _GRID_HEIGHT))
+            max(300, min(MONITOR_WIDTH - 10, GRID.WIDTH)),
+            max(200, min(MONITOR_HEIGHT - 60, GRID.HEIGHT))
         )
-
-        # or manually set "window size":
-        # RESOLUTION = (800, 600)
+    # else:  # manually set window size
+    #     RESOLUTION = (800, 600)
 
     # dimensions
     WIDTH, HEIGHT = RESOLUTION
     X_CENTER = WIDTH // 2
     Y_CENTER = HEIGHT // 2
-    X_TOP_LEFT = X_CENTER - _GRID_WIDTH // 2
-    Y_TOP_LEFT = Y_CENTER - _GRID_HEIGHT // 2
+    X_TOP_LEFT = X_CENTER - GRID.WIDTH // 2
+    Y_TOP_LEFT = Y_CENTER - GRID.HEIGHT // 2
 
     # frames per second
     FPS = 60

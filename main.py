@@ -17,7 +17,7 @@ class Demo:
         # Setup process
         self.is_running = True  # running main program flag
         self.is_move_done = False
-        self.game = Game(c.GRID.COLS, c.GRID.ROWS)
+        self.game = Game(c.GAME.COLS, c.GAME.ROWS)
 
     def loop_handler(self):
         """Resetting flags. Ticking internal clock by FPS."""

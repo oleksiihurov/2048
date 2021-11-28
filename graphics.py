@@ -49,21 +49,30 @@ class Graphics:
                 # pg.gfxdraw.box(
                 #     self.screen,
                 #     tile_rect,
-                #     pg.Color(c.TILE.COLOR.BACKGROUND[matrix[y, x]])
+                #     pg.Color(c.TILE.COLOR.BACKGROUND.get(
+                #         matrix[y, x],
+                #         c.TILE.COLOR.BACKGROUND_DEFAULT
+                #     ))
                 # )
                 pg.draw.rect(
                     surface=self.screen,
-                    color=c.TILE.COLOR.BACKGROUND[matrix[y, x]],
+                    color=c.TILE.COLOR.BACKGROUND.get(
+                        matrix[y, x],
+                        c.TILE.COLOR.BACKGROUND_DEFAULT
+                    ),
                     rect=tile_rect,
                     border_radius=3
                 )
 
                 if matrix[y, x]:
-                    font = pg.font.Font(path.join('assets', 'ClearSans-Bold.ttf'), 50)
+                    font = pg.font.Font(path.join('assets', 'ClearSans-Bold.ttf'), 65)
                     text = font.render(
                         str(matrix[y, x]),
                         True,
-                        pg.Color(c.TILE.COLOR.FOREGROUND[matrix[y, x]])
+                        pg.Color(c.TILE.COLOR.FOREGROUND.get(
+                            matrix[y, x],
+                            c.TILE.COLOR.FOREGROUND_DEFAULT
+                        ))
                     )
                     text_rect = text.get_rect()
                     text_rect.center = (
