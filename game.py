@@ -73,7 +73,7 @@ class Game:
 
         self.init_matrix()
         # self.test_matrix()
-        self.predefined_matrix()
+        # self.predefined_matrix()
 
     # --- Matrix initialization methods ---------------------------------------
 
@@ -105,14 +105,17 @@ class Game:
 
     def predefined_matrix(self):
         self.clear_matrix()
-        self.matrix = np.array(
-            [
-                [4, 0, 0, 0],
-                [8, 0, 0, 0],
-                [16, 8, 4, 2],
-                [64, 32, 16, 8]
-            ]
-        )
+        self.matrix = np.array([2 << i for i in range(16)][::-1]).reshape((4, 4))
+        # self.matrix = np.array([2 << i for i in range(16, 32)][::-1]).reshape((4, 4))
+
+        # self.matrix = np.array(
+        #     [
+        #         [16384, 0, 0, 0],
+        #         [1024, 0, 0, 0],
+        #         [128, 8, 4, 2],
+        #         [64, 32, 16, 8]
+        #     ]
+        # )
 
     def generate_tile(self, tile=2):
         """
