@@ -22,9 +22,9 @@ class TILE:
     # base size in pixels for the smallest grid 3x3
     _SIZE_3x3 = 130
     # multiplication factor for every larger grid
-    _SIZE_FACTOR = 0.95
+    SIZE_FACTOR = 0.95
     # size in pixels based on number of Grid's rows/cols
-    SIZE = int(_SIZE_3x3 * _SIZE_FACTOR ** (max(GAME.ROWS, GAME.COLS) - 3))
+    SIZE = int(_SIZE_3x3 * SIZE_FACTOR ** (max(GAME.ROWS, GAME.COLS) - 3))
 
     # fraction from Tile's size
     _PADDING_FRACTION = 0.12
@@ -109,7 +109,7 @@ class TILE:
             4294967296: '#f9f6f2'
         }
         SIZE_DEFAULT = 25
-        SIZE = {
+        SIZE = {  # for the grid 4x4
             0: 65,  # empty tile
             2: 65,
             4: 65,

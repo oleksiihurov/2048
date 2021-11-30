@@ -29,9 +29,64 @@ class Graphics:
 
         self.draw_background()
 
+        # preparing surfaces of tiles
+        self.tiles = dict()
+        self.prepare_tiles()
+
     def draw_background(self):
         """Drawing background to the screen surface."""
         self.screen.fill(pg.Color(c.GRID.COLOR))
+
+    def prepare_tiles(self):
+        """Pre-drawing all possible tiles for the game."""
+
+        tiles_list = [0] + [2 << i for i in range((c.GAME.ROWS * c.GAME.COLS))]
+        for tile in tiles_list:
+
+            tile_surface = pg.Surface((c.TILE.SIZE, c.TILE.SIZE), pg.SRCALPHA)
+            tile_rect = tile_surface.get_rect()
+
+            pg.draw.rect(
+                surface=tile_surface,
+                color=c.TILE.COLOR.get(
+                    tile,
+                    c.TILE.COLOR_DEFAULT
+                ),
+                rect=tile_rect,
+                border_radius=3
+            )
+            # pg.gfxdraw.box(
+            #     tile_surface,
+            #     tile_rect,
+            #     pg.Color(c.TILE.COLOR.get(
+            #         tile,
+            #         c.TILE.COLOR_DEFAULT
+            #     ))
+            # )
+
+            font_size_multiplier = c.TILE.SIZE_FACTOR ** (max(c.GAME.ROWS, c.GAME.COLS) - 4)
+            font_size = int(c.TILE.FONT.SIZE.get(
+                tile,
+                c.TILE.FONT.SIZE_DEFAULT
+            ) * font_size_multiplier)
+            if tile:
+                font = pg.font.Font(
+                    path.join('assets', 'ClearSans-Bold.ttf'),
+                    font_size
+                )
+                text = font.render(
+                    str(tile),
+                    True,
+                    pg.Color(c.TILE.FONT.COLOR.get(
+                        tile,
+                        c.TILE.FONT.COLOR_DEFAULT
+                    ))
+                )
+                text_rect = text.get_rect()
+                text_rect.center = (c.TILE.SIZE // 2, c.TILE.SIZE // 2)
+                tile_surface.blit(text, text_rect)
+
+            self.tiles[tile] = tile_surface
 
     def draw_grid(self, matrix: np.ndarray):
         """Drawing figures on the screen."""
@@ -40,52 +95,14 @@ class Graphics:
         for y in range(rows):
             for x in range(cols):
 
-                tile_rect = (
-                    c.SCREEN.X_TOP_LEFT + c.TILE.PADDING + x * (c.TILE.SIZE + c.TILE.PADDING),
-                    c.SCREEN.Y_TOP_LEFT + c.TILE.PADDING + y * (c.TILE.SIZE + c.TILE.PADDING),
-                    c.TILE.SIZE,
-                    c.TILE.SIZE
-                )
-                # pg.gfxdraw.box(
-                #     self.screen,
-                #     tile_rect,
-                #     pg.Color(c.TILE.COLOR.get(
-                #         matrix[y, x],
-                #         c.TILE.COLOR_DEFAULT
-                #     ))
-                # )
-                pg.draw.rect(
-                    surface=self.screen,
-                    color=c.TILE.COLOR.get(
-                        matrix[y, x],
-                        c.TILE.COLOR_DEFAULT
-                    ),
-                    rect=tile_rect,
-                    border_radius=3
+                tile_surface = self.tiles.get(matrix[y, x], 0)
+                tile_rect = tile_surface.get_rect()
+                tile_rect.center = (
+                    c.SCREEN.X_TOP_LEFT + c.TILE.PADDING + x * (c.TILE.SIZE + c.TILE.PADDING) + c.TILE.SIZE // 2,
+                    c.SCREEN.Y_TOP_LEFT + c.TILE.PADDING + y * (c.TILE.SIZE + c.TILE.PADDING) + c.TILE.SIZE // 2
                 )
 
-                if matrix[y, x]:
-                    font = pg.font.Font(
-                        path.join('assets', 'ClearSans-Bold.ttf'),
-                        c.TILE.FONT.SIZE.get(
-                            matrix[y, x],
-                            c.TILE.FONT.SIZE_DEFAULT
-                        )
-                    )
-                    text = font.render(
-                        str(matrix[y, x]),
-                        True,
-                        pg.Color(c.TILE.FONT.COLOR.get(
-                            matrix[y, x],
-                            c.TILE.FONT.COLOR_DEFAULT
-                        ))
-                    )
-                    text_rect = text.get_rect()
-                    text_rect.center = (
-                        c.SCREEN.X_TOP_LEFT + c.TILE.PADDING + x * (c.TILE.SIZE + c.TILE.PADDING) + c.TILE.SIZE // 2,
-                        c.SCREEN.Y_TOP_LEFT + c.TILE.PADDING + y * (c.TILE.SIZE + c.TILE.PADDING) + c.TILE.SIZE // 2
-                    )
-                    self.screen.blit(text, text_rect)
+                self.screen.blit(tile_surface, tile_rect)
 
     @staticmethod
     def show():

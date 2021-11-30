@@ -69,7 +69,7 @@ class Demo:
             print()
             pprint(self.game.stats.move)
             print()
-            print(f'Total moves = {sum(self.game.stats.move.values()) + self.game.stats.moves_idle}')
+            print(f'Total moves = {sum(self.game.stats.move.values())}')
             print()
             pprint(self.game.stats.merge)
             self.is_running = False
