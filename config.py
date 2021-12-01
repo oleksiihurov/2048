@@ -71,9 +71,11 @@ class PANEL1:
     Set of constants for Operational Panel.
     """
 
+    IS_PRESENT = True
+
     # size of the Operational Panel in pixels
     WIDTH = GRID.WIDTH
-    HEIGHT = 200
+    HEIGHT = 140 if IS_PRESENT else 0
 
     # dimensions - should be redefined in SCREEN
     X_TOP_LEFT = 0
@@ -87,7 +89,9 @@ class PANEL1:
 
     LABEL_COLOR = GRID.BG_COLOR
     LABEL_FONT_COLOR = '#ffffff'
-    LABEL_FONT_SIZE = 15
+    LABEL_FONT_SIZE = 18
+    LABEL_VALUE_FONT_COLOR = '#ffffff'
+    LABEL_VALUE_FONT_SIZE = 26
 
 
 @dataclass
@@ -124,13 +128,13 @@ class SCREEN:
     X_TOP_LEFT = X_CENTER - GRID.WIDTH // 2
     Y_TOP_LEFT = Y_CENTER - (PANEL1.HEIGHT + GRID.HEIGHT) // 2
 
-    # redefining PANEL1 dimensions
-    PANEL1.X_TOP_LEFT = X_TOP_LEFT
-    PANEL1.Y_TOP_LEFT = Y_TOP_LEFT
-
-    # redefining GRID dimensions
-    GRID.X_TOP_LEFT = X_TOP_LEFT
-    GRID.Y_TOP_LEFT = Y_TOP_LEFT + PANEL1.HEIGHT
+    if PANEL1.IS_PRESENT:
+        # redefining PANEL1 dimensions
+        PANEL1.X_TOP_LEFT = X_TOP_LEFT
+        PANEL1.Y_TOP_LEFT = Y_TOP_LEFT
+        # redefining GRID dimensions
+        GRID.X_TOP_LEFT = X_TOP_LEFT
+        GRID.Y_TOP_LEFT = Y_TOP_LEFT + PANEL1.HEIGHT
 
     # frames per second
     FPS = 60

@@ -56,6 +56,7 @@ class Demo:
         # }.get(np.random.randint(4))()
 
         if self.is_move_done:
+            graphics.draw_score(self.game.stats.score)
             self.game.generate_tile(self.game.choose_tile())
         if self.game.is_game_lost():
             self.game.game_lost_procedure()

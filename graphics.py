@@ -28,6 +28,8 @@ class Graphics:
         pg.display.set_icon(pg.image.load(path.join('assets', 'favicon.ico')))
 
         self.draw_background()
+        if c.PANEL1.IS_PRESENT:
+            self.draw_panel1()
 
         # preparing surfaces of tiles
         self.tiles = dict()
@@ -45,6 +47,111 @@ class Graphics:
             pg.Color(c.GRID.BG_COLOR),
             (c.GRID.X_TOP_LEFT, c.GRID.Y_TOP_LEFT, c.GRID.WIDTH, c.GRID.HEIGHT)
         )
+
+    @staticmethod
+    def show():
+        """Reflecting all the drawings on the display."""
+        pg.display.flip()
+
+    # --- Panel drawings ------------------------------------------------------
+
+    def draw_button(self, button_text: str, topright_position):
+        button_surface = pg.Surface((c.TILE.SIZE, 40), pg.SRCALPHA)
+        button_rect = button_surface.get_rect()
+
+        pg.draw.rect(
+            surface=button_surface,
+            color=pg.Color(c.PANEL1.BUTTON_COLOR),
+            rect=button_rect,
+            border_radius=3
+        )
+
+        font_size_multiplier = c.TILE.SIZE_FACTOR ** (max(c.GAME.ROWS, c.GAME.COLS) - 4)
+        font_size = int(c.PANEL1.BUTTON_FONT_SIZE * font_size_multiplier)
+        font = pg.font.Font(
+            path.join('assets', 'ClearSansBold.ttf'),
+            font_size
+        )
+        text = font.render(
+            button_text,
+            True,
+            pg.Color(c.PANEL1.BUTTON_FONT_COLOR)
+        )
+        text_rect = text.get_rect()
+        text_rect.center = (c.TILE.SIZE // 2, 40 // 2)
+
+        button_surface.blit(text, text_rect)
+        button_rect.topright = topright_position
+
+        self.screen.blit(button_surface, button_rect)
+
+    def draw_label(self, label_text: str, width, height, label_color, label_font_color, label_font_size, topleft_position, text_center_alignment = True):
+        label_surface = pg.Surface((width, height), pg.SRCALPHA)
+        label_rect = label_surface.get_rect()
+
+        pg.draw.rect(
+            surface=label_surface,
+            color=pg.Color(label_color),
+            rect=label_rect,
+            border_radius=3
+        )
+
+        font_size_multiplier = c.TILE.SIZE_FACTOR ** (max(c.GAME.ROWS, c.GAME.COLS) - 4)
+        font_size = int(label_font_size * font_size_multiplier)
+        font = pg.font.Font(
+            path.join('assets', 'ClearSansBold.ttf'),
+            font_size
+        )
+        text = font.render(
+            label_text,
+            True,
+            pg.Color(label_font_color)
+        )
+        text_rect = text.get_rect()
+        if text_center_alignment:
+            text_rect.center = (width // 2, height // 2)
+        else:
+            text_rect.midleft = (0, height // 2)
+
+        label_surface.blit(text, text_rect)
+        label_rect.topleft = topleft_position
+
+        self.screen.blit(label_surface, label_rect)
+
+    def draw_score(self, score: int):
+        if c.PANEL1.IS_PRESENT:
+            self.draw_label(
+                str(score),
+                c.TILE.SIZE, 40,
+                c.PANEL1.LABEL_COLOR,
+                c.PANEL1.LABEL_VALUE_FONT_COLOR,
+                c.PANEL1.LABEL_VALUE_FONT_SIZE,
+                (c.PANEL1.X_TOP_LEFT + c.TILE.PADDING + c.TILE.SIZE // 1.1, c.PANEL1.Y_TOP_LEFT + 20),
+                text_center_alignment=False
+            )
+
+    def draw_merged_tiles(self):
+        if c.PANEL1.IS_PRESENT:
+            pass
+            # TODO
+
+    def draw_panel1(self):
+        """Drawing operational panel on the screen."""
+
+        self.draw_button('New Game', (c.PANEL1.X_TOP_LEFT + c.PANEL1.WIDTH - c.TILE.PADDING, c.PANEL1.Y_TOP_LEFT + 20))
+        self.draw_button('Undo', (c.PANEL1.X_TOP_LEFT + c.PANEL1.WIDTH - c.TILE.PADDING, c.PANEL1.Y_TOP_LEFT + 80))
+
+        self.draw_label(
+            'SCORE:',
+            c.TILE.SIZE, 40,
+            c.PANEL1.LABEL_COLOR,
+            c.PANEL1.LABEL_FONT_COLOR,
+            c.PANEL1.LABEL_FONT_SIZE,
+            (c.PANEL1.X_TOP_LEFT + c.TILE.PADDING, c.PANEL1.Y_TOP_LEFT + 20)
+        )
+        self.draw_score(0)
+
+    # --- Grid drawings -------------------------------------------------------
 
     @staticmethod
     def get_tile_color(tile):
@@ -108,10 +215,6 @@ class Graphics:
 
             self.tiles[tile] = tile_surface
 
-    def draw_panel1(self):
-        pass
-        # TODO
-
     def draw_grid(self, matrix: np.ndarray):
         """Drawing grid on the screen."""
 
@@ -130,11 +233,6 @@ class Graphics:
                 )
 
                 self.screen.blit(tile_surface, tile_rect)
-
-    @staticmethod
-    def show():
-        """Reflecting all the drawings on the display."""
-        pg.display.flip()
 
 
 # --- Graphics context realization --------------------------------------------
