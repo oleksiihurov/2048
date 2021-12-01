@@ -58,20 +58,7 @@ class Demo:
         if self.is_move_done:
             self.game.generate_tile(self.game.choose_tile())
         if self.game.is_game_lost():
-            from pprint import pprint
-            print('Game lost!')
-            print()
-            print(self.game.matrix)
-            print()
-            print(f'{self.game.stats.score = }')
-            print()
-            print(f'{self.game.stats.moves_idle = }')
-            print()
-            pprint(self.game.stats.move)
-            print()
-            print(f'Total moves = {sum(self.game.stats.move.values())}')
-            print()
-            pprint(self.game.stats.merge)
+            self.game.game_lost_procedure()
             self.is_running = False
 
     def graphics_handler(self):

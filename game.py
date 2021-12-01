@@ -159,6 +159,18 @@ class Game:
         # Otherwise it's really lost game
         return True
 
+    def game_lost_procedure(self):
+        from pprint import pprint
+        print('Game lost!\n')
+        print(self.matrix)
+        print(f'\n{self.stats.score = }')
+        print(f'\n{self.stats.moves_idle = }')
+        print(f'\nTotal moves = {sum(self.stats.move.values())}')
+        print()
+        [print(f'{k} = {v}') for k, v in self.stats.move.items()]
+        print()
+        pprint({k: v for k, v in self.stats.merge.items() if v})
+
     # --- Operations over matrix methods  -------------------------------------
 
     def reverse_matrix(self):

@@ -33,10 +33,12 @@ class TILE:
     # size in pixels between Tiles
     PADDING = int(SIZE * _PADDING_FRACTION)
 
+    # with open(path.join('assets', 'TileColorsAlternative.json'), 'r') as json_file:
     with open(path.join('assets', 'TileColors.json'), 'r') as json_file:
         obj = json.load(json_file)
     COLOR = {int(k): v for k, v in obj.items()}
 
+    # with open(path.join('assets', 'TileFontColorsAlternative.json'), 'r') as json_file:
     with open(path.join('assets', 'TileFontColors.json'), 'r') as json_file:
         obj = json.load(json_file)
     FONT_COLOR = {int(k): v for k, v in obj.items()}
@@ -56,7 +58,36 @@ class GRID:
     WIDTH = GAME.COLS * TILE.SIZE + (GAME.COLS + 1) * TILE.PADDING
     HEIGHT = GAME.ROWS * TILE.SIZE + (GAME.ROWS + 1) * TILE.PADDING
 
-    COLOR = '#bbada0'
+    # dimensions - should be redefined in SCREEN
+    X_TOP_LEFT = 0
+    Y_TOP_LEFT = 0
+
+    BG_COLOR = '#bbada0'
+
+
+@dataclass
+class PANEL1:
+    """
+    Set of constants for Operational Panel.
+    """
+
+    # size of the Operational Panel in pixels
+    WIDTH = GRID.WIDTH
+    HEIGHT = 200
+
+    # dimensions - should be redefined in SCREEN
+    X_TOP_LEFT = 0
+    Y_TOP_LEFT = 0
+
+    BG_COLOR = '#ffffff'
+
+    BUTTON_COLOR = '#8f7a66'
+    BUTTON_FONT_COLOR = '#ffffff'
+    BUTTON_FONT_SIZE = 20
+
+    LABEL_COLOR = GRID.BG_COLOR
+    LABEL_FONT_COLOR = '#ffffff'
+    LABEL_FONT_SIZE = 15
 
 
 @dataclass
@@ -81,17 +112,25 @@ class SCREEN:
     else:  # window size
         RESOLUTION = (
             max(300, min(MONITOR_WIDTH - 10, GRID.WIDTH)),
-            max(200, min(MONITOR_HEIGHT - 60, GRID.HEIGHT))
+            max(200, min(MONITOR_HEIGHT - 60, PANEL1.HEIGHT + GRID.HEIGHT))
         )
     # else:  # manually set window size
     #     RESOLUTION = (800, 600)
 
-    # dimensions
+    # SCREEN dimensions
     WIDTH, HEIGHT = RESOLUTION
     X_CENTER = WIDTH // 2
     Y_CENTER = HEIGHT // 2
     X_TOP_LEFT = X_CENTER - GRID.WIDTH // 2
-    Y_TOP_LEFT = Y_CENTER - GRID.HEIGHT // 2
+    Y_TOP_LEFT = Y_CENTER - (PANEL1.HEIGHT + GRID.HEIGHT) // 2
+
+    # redefining PANEL1 dimensions
+    PANEL1.X_TOP_LEFT = X_TOP_LEFT
+    PANEL1.Y_TOP_LEFT = Y_TOP_LEFT
+
+    # redefining GRID dimensions
+    GRID.X_TOP_LEFT = X_TOP_LEFT
+    GRID.Y_TOP_LEFT = Y_TOP_LEFT + PANEL1.HEIGHT
 
     # frames per second
     FPS = 60

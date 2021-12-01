@@ -35,7 +35,16 @@ class Graphics:
 
     def draw_background(self):
         """Drawing background to the screen surface."""
-        self.screen.fill(pg.Color(c.GRID.COLOR))
+
+        # self.screen.fill(pg.Color(c.GRID.BG_COLOR))
+        self.screen.fill(
+            pg.Color(c.PANEL1.BG_COLOR),
+            (c.PANEL1.X_TOP_LEFT, c.PANEL1.Y_TOP_LEFT, c.PANEL1.WIDTH, c.PANEL1.HEIGHT)
+        )
+        self.screen.fill(
+            pg.Color(c.GRID.BG_COLOR),
+            (c.GRID.X_TOP_LEFT, c.GRID.Y_TOP_LEFT, c.GRID.WIDTH, c.GRID.HEIGHT)
+        )
 
     @staticmethod
     def get_tile_color(tile):
@@ -99,8 +108,12 @@ class Graphics:
 
             self.tiles[tile] = tile_surface
 
+    def draw_panel1(self):
+        pass
+        # TODO
+
     def draw_grid(self, matrix: np.ndarray):
-        """Drawing figures on the screen."""
+        """Drawing grid on the screen."""
 
         rows, cols = matrix.shape
         for y in range(rows):
@@ -112,8 +125,8 @@ class Graphics:
                     raise KeyError(f"Can't find predefined tile surface for the matrix value: {matrix[y, x]}")
                 tile_rect = tile_surface.get_rect()
                 tile_rect.center = (
-                    c.SCREEN.X_TOP_LEFT + c.TILE.PADDING + x * (c.TILE.SIZE + c.TILE.PADDING) + c.TILE.SIZE // 2,
-                    c.SCREEN.Y_TOP_LEFT + c.TILE.PADDING + y * (c.TILE.SIZE + c.TILE.PADDING) + c.TILE.SIZE // 2
+                    c.GRID.X_TOP_LEFT + c.TILE.PADDING + x * (c.TILE.SIZE + c.TILE.PADDING) + c.TILE.SIZE // 2,
+                    c.GRID.Y_TOP_LEFT + c.TILE.PADDING + y * (c.TILE.SIZE + c.TILE.PADDING) + c.TILE.SIZE // 2
                 )
 
                 self.screen.blit(tile_surface, tile_rect)
