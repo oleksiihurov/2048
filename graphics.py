@@ -37,6 +37,31 @@ class Graphics:
         """Drawing background to the screen surface."""
         self.screen.fill(pg.Color(c.GRID.COLOR))
 
+    @staticmethod
+    def get_tile_color(tile):
+        try:
+            result = c.TILE.COLOR[tile]
+        except KeyError:
+            result = c.TILE.COLOR[-1]
+        return pg.Color(result)
+
+    @staticmethod
+    def get_tile_font_color(tile):
+        try:
+            result = c.TILE.FONT_COLOR[tile]
+        except KeyError:
+            result = c.TILE.FONT_COLOR[-1]
+        return pg.Color(result)
+
+    @staticmethod
+    def get_tile_font_size(tile):
+        try:
+            result = c.TILE.FONT_SIZE[tile]
+        except KeyError:
+            result = c.TILE.FONT_SIZE[-1]
+        font_size_multiplier = c.TILE.SIZE_FACTOR ** (max(c.GAME.ROWS, c.GAME.COLS) - 4)
+        return int(result * font_size_multiplier)
+
     def prepare_tiles(self):
         """Pre-drawing all possible tiles for the game."""
 
@@ -48,39 +73,25 @@ class Graphics:
 
             pg.draw.rect(
                 surface=tile_surface,
-                color=c.TILE.COLOR.get(
-                    tile,
-                    c.TILE.COLOR_DEFAULT
-                ),
+                color=self.get_tile_color(tile),
                 rect=tile_rect,
                 border_radius=3
             )
             # pg.gfxdraw.box(
             #     tile_surface,
             #     tile_rect,
-            #     pg.Color(c.TILE.COLOR.get(
-            #         tile,
-            #         c.TILE.COLOR_DEFAULT
-            #     ))
+            #     self.get_tile_color(tile)
             # )
 
-            font_size_multiplier = c.TILE.SIZE_FACTOR ** (max(c.GAME.ROWS, c.GAME.COLS) - 4)
-            font_size = int(c.TILE.FONT.SIZE.get(
-                tile,
-                c.TILE.FONT.SIZE_DEFAULT
-            ) * font_size_multiplier)
             if tile:
                 font = pg.font.Font(
-                    path.join('assets', 'ClearSans-Bold.ttf'),
-                    font_size
+                    path.join('assets', 'ClearSansBold.ttf'),
+                    self.get_tile_font_size(tile)
                 )
                 text = font.render(
                     str(tile),
                     True,
-                    pg.Color(c.TILE.FONT.COLOR.get(
-                        tile,
-                        c.TILE.FONT.COLOR_DEFAULT
-                    ))
+                    self.get_tile_font_color(tile)
                 )
                 text_rect = text.get_rect()
                 text_rect.center = (c.TILE.SIZE // 2, c.TILE.SIZE // 2)
