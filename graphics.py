@@ -95,7 +95,10 @@ class Graphics:
         for y in range(rows):
             for x in range(cols):
 
-                tile_surface = self.tiles.get(matrix[y, x], 0)
+                try:
+                    tile_surface = self.tiles[matrix[y, x]]
+                except KeyError:
+                    raise KeyError(f"Can't find predefined tile surface for the matrix value: {matrix[y, x]}")
                 tile_rect = tile_surface.get_rect()
                 tile_rect.center = (
                     c.SCREEN.X_TOP_LEFT + c.TILE.PADDING + x * (c.TILE.SIZE + c.TILE.PADDING) + c.TILE.SIZE // 2,

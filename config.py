@@ -19,12 +19,12 @@ class TILE:
     Set of constants for particular Tile of Grid.
     """
 
-    # base size in pixels for the smallest grid 3x3
-    _SIZE_3x3 = 130
+    # base size in pixels for the grid 4x4
+    _SIZE_4x4 = 123
     # multiplication factor for every larger grid
     SIZE_FACTOR = 0.95
     # size in pixels based on number of Grid's rows/cols
-    SIZE = int(_SIZE_3x3 * SIZE_FACTOR ** (max(GAME.ROWS, GAME.COLS) - 3))
+    SIZE = int(_SIZE_4x4 * SIZE_FACTOR ** (max(GAME.ROWS, GAME.COLS) - 4))
 
     # fraction from Tile's size
     _PADDING_FRACTION = 0.12
@@ -45,17 +45,17 @@ class TILE:
         512: '#edc850',
         1024: '#edc53f',
         2048: '#edc22e',
-        4096: '#3c3a32',
-        8192: '#3c3a32',
-        16384: '#3c3a32',
-        32768: '#3c3a32',
-        65536: '#3c3a32',
+        4096: '#cfabcf',
+        8192: '#c18ac1',
+        16384: '#b26ab3',
+        32768: '#940094',
+        65536: '#750075',
 
-        131072: '#3c3a32',
-        262144: '#3c3a32',
-        524288: '#3c3a32',
-        1048576: '#3c3a32',
-        2097152: '#3c3a32',
+        131072: '#888edc',
+        262144: '#777dd9',
+        524288: '#646bd5',
+        1048576: '#515ad1',
+        2097152: '#3f47cc',
         4194304: '#3c3a32',
         8388608: '#3c3a32',
         16777216: '#3c3a32',
