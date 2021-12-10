@@ -21,8 +21,9 @@ class TILE:
     _SIZE_4x4 = 123
     # multiplication factor for every larger grid
     SIZE_FACTOR = 0.95
+    SCALE = SIZE_FACTOR ** (max(GAME.ROWS, GAME.COLS) - 4)
     # size in pixels based on number of Grid's rows/cols
-    SIZE = int(_SIZE_4x4 * SIZE_FACTOR ** (max(GAME.ROWS, GAME.COLS) - 4))
+    SIZE = int(_SIZE_4x4 * SCALE)
 
     # fraction from Tile's size
     _PADDING_FRACTION = 0.12

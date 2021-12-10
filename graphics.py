@@ -66,8 +66,7 @@ class Graphics:
             border_radius=3
         )
 
-        font_size_multiplier = TILE.SIZE_FACTOR ** (max(GAME.ROWS, GAME.COLS) - 4)
-        font_size = int(PANEL.BUTTON_FONT_SIZE * font_size_multiplier)
+        font_size = int(PANEL.BUTTON_FONT_SIZE * TILE.SCALE)
         font = pg.font.Font(
             path.join('assets', 'ClearSansBold.ttf'),
             font_size
@@ -96,8 +95,7 @@ class Graphics:
             border_radius=3
         )
 
-        font_size_multiplier = TILE.SIZE_FACTOR ** (max(GAME.ROWS, GAME.COLS) - 4)
-        font_size = int(label_font_size * font_size_multiplier)
+        font_size = int(label_font_size * TILE.SCALE)
         font = pg.font.Font(
             path.join('assets', 'ClearSansBold.ttf'),
             font_size
@@ -175,8 +173,7 @@ class Graphics:
             result = TILE.FONT_SIZE_4x4[tile]
         except KeyError:
             result = TILE.FONT_SIZE_4x4[-1]
-        font_size_multiplier = TILE.SIZE_FACTOR ** (max(GAME.ROWS, GAME.COLS) - 4)
-        return int(result * font_size_multiplier)
+        return int(result * TILE.SCALE)
 
     def prepare_tiles(self):
         """Pre-drawing all possible tiles for the game."""
