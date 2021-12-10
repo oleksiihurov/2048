@@ -1,5 +1,6 @@
 # External imports
 import pygame as pg
+import numpy as np
 
 # Project imports
 from config import GAME

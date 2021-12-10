@@ -29,7 +29,7 @@ class Graphics:
 
         self.draw_background()
         if PANEL.IS_PRESENT:
-            self.draw_panel1()
+            self.draw_panel()
 
         # preparing surfaces of tiles
         self.tiles = dict()
@@ -133,7 +133,7 @@ class Graphics:
             pass
             # TODO
 
-    def draw_panel1(self):
+    def draw_panel(self):
         """Drawing operational panel on the screen."""
 
         self.draw_button('New Game', (PANEL.X_TOP_LEFT + PANEL.WIDTH - TILE.PADDING, PANEL.Y_TOP_LEFT + 20))
