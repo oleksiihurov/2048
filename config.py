@@ -6,9 +6,7 @@ import json
 
 @dataclass
 class GAME:
-    """
-    Set of constants for Game.
-    """
+    """Set of constants for Game."""
 
     ROWS = 4  # 3 <= ROWS <= 20
     COLS = 4  # 3 <= COLS <= 20
@@ -17,9 +15,7 @@ class GAME:
 
 @dataclass
 class TILE:
-    """
-    Set of constants for particular Tile of Grid.
-    """
+    """Set of constants for particular Tile of Grid."""
 
     # base size in pixels for the grid 4x4
     _SIZE_4x4 = 123
@@ -45,14 +41,12 @@ class TILE:
 
     with open(path.join('assets', 'TileFontSizes.json'), 'r') as json_file:
         obj = json.load(json_file)
-    FONT_SIZE = {int(k): v for k, v in obj.items()}
+    FONT_SIZE_4x4 = {int(k): v for k, v in obj.items()}
 
 
 @dataclass
 class GRID:
-    """
-    Set of constants for Grid.
-    """
+    """Set of constants for Grid."""
 
     # size of the Grid in pixels
     WIDTH = GAME.COLS * TILE.SIZE + (GAME.COLS + 1) * TILE.PADDING
@@ -66,10 +60,8 @@ class GRID:
 
 
 @dataclass
-class PANEL1:
-    """
-    Set of constants for Operational Panel.
-    """
+class PANEL:
+    """Set of constants for Operational Panel."""
 
     IS_PRESENT = True
 
@@ -116,7 +108,7 @@ class SCREEN:
     else:  # window size
         RESOLUTION = (
             max(300, min(MONITOR_WIDTH - 10, GRID.WIDTH)),
-            max(200, min(MONITOR_HEIGHT - 60, PANEL1.HEIGHT + GRID.HEIGHT))
+            max(200, min(MONITOR_HEIGHT - 60, PANEL.HEIGHT + GRID.HEIGHT))
         )
     # else:  # manually set window size
     #     RESOLUTION = (800, 600)
@@ -126,15 +118,15 @@ class SCREEN:
     X_CENTER = WIDTH // 2
     Y_CENTER = HEIGHT // 2
     X_TOP_LEFT = X_CENTER - GRID.WIDTH // 2
-    Y_TOP_LEFT = Y_CENTER - (PANEL1.HEIGHT + GRID.HEIGHT) // 2
+    Y_TOP_LEFT = Y_CENTER - (PANEL.HEIGHT + GRID.HEIGHT) // 2
 
-    if PANEL1.IS_PRESENT:
+    if PANEL.IS_PRESENT:
         # redefining PANEL1 dimensions
-        PANEL1.X_TOP_LEFT = X_TOP_LEFT
-        PANEL1.Y_TOP_LEFT = Y_TOP_LEFT
+        PANEL.X_TOP_LEFT = X_TOP_LEFT
+        PANEL.Y_TOP_LEFT = Y_TOP_LEFT
         # redefining GRID dimensions
         GRID.X_TOP_LEFT = X_TOP_LEFT
-        GRID.Y_TOP_LEFT = Y_TOP_LEFT + PANEL1.HEIGHT
+        GRID.Y_TOP_LEFT = Y_TOP_LEFT + PANEL.HEIGHT
 
     # frames per second
     FPS = 60
