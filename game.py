@@ -92,8 +92,8 @@ class Game:
         Initialize matrix with two new tiles in grid.
         """
         self.clear_matrix()
-        self.generate_tile()
-        self.generate_tile()
+        self.generate_new_tile()
+        self.generate_new_tile()
 
     def test_matrix(self):
         self.clear_matrix()
@@ -112,7 +112,7 @@ class Game:
             [8192, 4096, 2048, 1024]
         ])
 
-    def generate_tile(self, tile=2):
+    def generate_new_tile(self, tile=2):
         """
         Generate new tile on a random empty place in the matrix.
         """

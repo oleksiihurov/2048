@@ -1,11 +1,13 @@
 # External imports
-import pygame as pg
 import numpy as np
+import pygame as pg
+import pygame_gui as pgui
 
 # Project imports
 from config import GAME, SCREEN
 from game import Game
 from graphics import Graphics
+from gui import GUI
 
 
 # --- Demo --------------------------------------------------------------------
@@ -22,6 +24,7 @@ class Demo:
         # Setup graphics
         self.game = Game(GAME.COLS, GAME.ROWS)
         self.graphics = Graphics(SCREEN.RESOLUTION)
+        self.gui = GUI(self.graphics.screen)
 
     def loop_handler(self):
         """Resetting flags. Ticking internal clock by FPS."""
@@ -56,6 +59,17 @@ class Demo:
                 if event.key == pg.K_LEFT:
                     self.is_move_done = self.game.left()
 
+            # events from GUI
+            if event.type == pg.USEREVENT:
+                if event.user_type == pgui.UI_BUTTON_PRESSED:
+                    if event.ui_element == self.gui.button_new_game:
+                        print('[New Game]')
+                    if event.ui_element == self.gui.button_undo:
+                        print('[Undo]')
+
+            self.gui.manager.process_events(event)
+        self.gui.manager.update(self.graphics.time_delta)
+
     def actions_handler(self):
         """Program actions in the main loop."""
 
@@ -67,13 +81,14 @@ class Demo:
         # }.get(np.random.randint(4))()
 
         if self.is_move_done:
-            self.graphics.draw_score(self.game.stats.score)
-            self.game.generate_tile(self.game.choose_tile())
+            self.gui.update_score(self.game.stats.score)
+            self.game.generate_new_tile(self.game.choose_tile())
         if self.game.is_game_lost():
             self.game.game_lost_procedure()
             self.is_running = False
 
     def graphics_handler(self):
         """Redrawing the screen."""
+        self.gui.draw()
         self.graphics.draw_grid(self.game.matrix)
         self.graphics.show()

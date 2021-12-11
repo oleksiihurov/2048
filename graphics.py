@@ -4,11 +4,12 @@ from os import environ, path
 # External imports
 import numpy as np
 import pygame as pg
-import pygame.gfxdraw
 
 # Project imports
 from config import GAME, TILE, GRID, PANEL, SCREEN
 
+
+# --- Graphics ----------------------------------------------------------------
 
 class Graphics:
     """Setup of pygame graphics."""
@@ -33,8 +34,6 @@ class Graphics:
         self.time_delta = None
 
         self.draw_background()
-        if PANEL.IS_PRESENT:
-            self.draw_panel()
 
         # preparing surfaces of tiles
         self.tiles = dict()
@@ -44,15 +43,18 @@ class Graphics:
         """Drawing background to the screen surface."""
 
         self.screen.fill(
-            pg.Color(SCREEN.BG_COLOR)
+            pg.Color(SCREEN.BG_COLOR),
+            (0, 0, SCREEN.WIDTH, SCREEN.HEIGHT)
         )
-        self.screen.fill(
-            pg.Color(PANEL.BG_COLOR),
-            (PANEL.X_TOP_LEFT, PANEL.Y_TOP_LEFT, PANEL.WIDTH, PANEL.HEIGHT)
-        )
-        self.screen.fill(
-            pg.Color(GRID.BG_COLOR),
-            (GRID.X_TOP_LEFT, GRID.Y_TOP_LEFT, GRID.WIDTH, GRID.HEIGHT)
+
+        pg.draw.rect(
+            surface = self.screen,
+            color = pg.Color(GRID.BG_COLOR),
+            rect = (
+                GRID.X_TOP_LEFT, GRID.Y_TOP_LEFT,
+                GRID.WIDTH, GRID.HEIGHT
+            ),
+            border_radius = 7
         )
 
     def clock_tick(self):
@@ -63,102 +65,6 @@ class Graphics:
     def show():
         """Reflecting all the drawings on the display."""
         pg.display.flip()
-
-    # --- Panel drawings ------------------------------------------------------
-
-    def draw_button(self, button_text: str, topright_position):
-        button_surface = pg.Surface((TILE.SIZE, 40), pg.SRCALPHA)
-        button_rect = button_surface.get_rect()
-
-        pg.draw.rect(
-            surface=button_surface,
-            color=pg.Color(PANEL.BUTTON_COLOR),
-            rect=button_rect,
-            border_radius=3
-        )
-
-        font_size = int(PANEL.BUTTON_FONT_SIZE * TILE.SCALE)
-        font = pg.font.Font(
-            path.join('assets', 'ClearSansBold.ttf'),
-            font_size
-        )
-        text = font.render(
-            button_text,
-            True,
-            pg.Color(PANEL.BUTTON_FONT_COLOR)
-        )
-        text_rect = text.get_rect()
-        text_rect.center = (TILE.SIZE // 2, 40 // 2)
-
-        button_surface.blit(text, text_rect)
-        button_rect.topright = topright_position
-
-        self.screen.blit(button_surface, button_rect)
-
-    def draw_label(self, label_text: str, width, height, label_color, label_font_color, label_font_size, topleft_position, text_center_alignment = True):
-        label_surface = pg.Surface((width, height), pg.SRCALPHA)
-        label_rect = label_surface.get_rect()
-
-        pg.draw.rect(
-            surface=label_surface,
-            color=pg.Color(label_color),
-            rect=label_rect,
-            border_radius=3
-        )
-
-        font_size = int(label_font_size * TILE.SCALE)
-        font = pg.font.Font(
-            path.join('assets', 'ClearSansBold.ttf'),
-            font_size
-        )
-        text = font.render(
-            label_text,
-            True,
-            pg.Color(label_font_color)
-        )
-        text_rect = text.get_rect()
-        if text_center_alignment:
-            text_rect.center = (width // 2, height // 2)
-        else:
-            text_rect.midleft = (0, height // 2)
-
-        label_surface.blit(text, text_rect)
-        label_rect.topleft = topleft_position
-
-        self.screen.blit(label_surface, label_rect)
-
-    def draw_score(self, score: int):
-        if PANEL.IS_PRESENT:
-            self.draw_label(
-                str(score),
-                TILE.SIZE, 40,
-                PANEL.LABEL_COLOR,
-                PANEL.LABEL_VALUE_FONT_COLOR,
-                PANEL.LABEL_VALUE_FONT_SIZE,
-                (PANEL.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 1.1, PANEL.Y_TOP_LEFT + 20),
-                text_center_alignment=False
-            )
-
-    def draw_merged_tiles(self):
-        if PANEL.IS_PRESENT:
-            pass
-            # TODO
-
-    def draw_panel(self):
-        """Drawing operational panel on the screen."""
-
-        self.draw_button('New Game', (PANEL.X_TOP_LEFT + PANEL.WIDTH - TILE.PADDING, PANEL.Y_TOP_LEFT + 20))
-        self.draw_button('Undo', (PANEL.X_TOP_LEFT + PANEL.WIDTH - TILE.PADDING, PANEL.Y_TOP_LEFT + 80))
-
-        self.draw_label(
-            'SCORE:',
-            TILE.SIZE, 40,
-            PANEL.LABEL_COLOR,
-            PANEL.LABEL_FONT_COLOR,
-            PANEL.LABEL_FONT_SIZE,
-            (PANEL.X_TOP_LEFT + TILE.PADDING, PANEL.Y_TOP_LEFT + 20)
-        )
-        self.draw_score(0)
 
     # --- Grid drawings -------------------------------------------------------
 
@@ -201,11 +107,6 @@ class Graphics:
                 rect=tile_rect,
                 border_radius=3
             )
-            # pg.gfxdraw.box(
-            #     tile_surface,
-            #     tile_rect,
-            #     self.get_tile_color(tile)
-            # )
 
             if tile:
                 font = pg.font.Font(

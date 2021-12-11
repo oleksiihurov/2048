@@ -69,22 +69,10 @@ class PANEL:
 
     # size of the Operational Panel in pixels
     WIDTH = None  # will be calculated further
-    HEIGHT = 140 if IS_PRESENT else 0
+    HEIGHT = 194 if IS_PRESENT else 0
 
     X_TOP_LEFT = None  # will be calculated further
     Y_TOP_LEFT = None  # will be calculated further
-
-    BG_COLOR = '#ffffff'
-
-    BUTTON_COLOR = '#8f7a66'
-    BUTTON_FONT_COLOR = '#ffffff'
-    BUTTON_FONT_SIZE = 20
-
-    LABEL_COLOR = GRID.BG_COLOR
-    LABEL_FONT_COLOR = '#ffffff'
-    LABEL_FONT_SIZE = 18
-    LABEL_VALUE_FONT_COLOR = '#ffffff'
-    LABEL_VALUE_FONT_SIZE = 26
 
 
 @dataclass
@@ -102,7 +90,7 @@ class SCREEN:
     MONITOR_WIDTH = ctypes.windll.user32.GetSystemMetrics(0)
     MONITOR_HEIGHT = ctypes.windll.user32.GetSystemMetrics(1)
 
-    WIDTH_MIN = 300
+    WIDTH_MIN = 590
     HEIGHT_MIN = 200
 
     WIDTH_MAX = MONITOR_WIDTH if FULL_SCREEN_MODE else MONITOR_WIDTH - 10
@@ -113,12 +101,14 @@ class SCREEN:
     HEIGHT = None  # will be calculated further
     RESOLUTION = None  # will be calculated further
 
+    MARGIN = 14
+
     X_CENTER = None  # will be calculated further
     Y_CENTER = None  # will be calculated further
     X_TOP_LEFT = None  # will be calculated further
     Y_TOP_LEFT = None  # will be calculated further
 
-    BG_COLOR = '#000000'
+    BG_COLOR = '#faf8ef'
 
     # frames per second
     FPS = 60
@@ -137,16 +127,16 @@ def calculating_the_scale_multiplier():
 
     if not max(GAME.ROWS, GAME.COLS) == 4:
         # Step 1: calculating non-scaled maximum supported grid dimensions
-        _TOTAL_WIDTH_16x16 = 16 * GRID.WIDTH_4x4 / 4
-        _TOTAL_HEIGHT_16x16 = 16 * GRID.HEIGHT_4x4 / 4 + PANEL.HEIGHT
+        _TOTAL_WIDTH_16x16 = 16 * GRID.WIDTH_4x4 / 4 + 2 * SCREEN.MARGIN
+        _TOTAL_HEIGHT_16x16 = 16 * GRID.HEIGHT_4x4 / 4 + PANEL.HEIGHT + SCREEN.MARGIN
 
         # Step 2: deciding which dimension is taken as size limit
         if _TOTAL_HEIGHT_16x16 / SCREEN.HEIGHT_MAX > _TOTAL_WIDTH_16x16 / SCREEN.WIDTH_MAX:
-            _GRID_HEIGHT_16x16 = SCREEN.HEIGHT_MAX - PANEL.HEIGHT
+            _GRID_HEIGHT_16x16 = SCREEN.HEIGHT_MAX - PANEL.HEIGHT - SCREEN.MARGIN
             _GRID_WIDTH_16x16 = _GRID_HEIGHT_16x16
         else:
-            _GRID_WIDTH_16x16 = SCREEN.WIDTH_MAX
-            _GRID_HEIGHT_16x16 = _GRID_WIDTH_16x16 + PANEL.HEIGHT
+            _GRID_WIDTH_16x16 = SCREEN.WIDTH_MAX - 2 * SCREEN.MARGIN
+            _GRID_HEIGHT_16x16 = _GRID_WIDTH_16x16
 
         # Step 3: calculating TILE.SIZE, taking the wider dimension as basement
         if GAME.COLS > GAME.ROWS:
@@ -170,7 +160,7 @@ def calculating_the_scale_multiplier():
     TILE.SCALE = TILE.SIZE / TILE.SIZE_4x4
 
     # Step 6: calculating the rest of the dimensions
-    PANEL.WIDTH = GRID.WIDTH
+    PANEL.WIDTH = max(SCREEN.WIDTH_MIN - 2 * SCREEN.MARGIN, GRID.WIDTH)
 
     if SCREEN.FULL_SCREEN_MODE:
         SCREEN.RESOLUTION = (
@@ -179,21 +169,22 @@ def calculating_the_scale_multiplier():
         )
     else:  # WINDOW_MODE
         SCREEN.RESOLUTION = (
-            max(SCREEN.WIDTH_MIN, min(SCREEN.WIDTH_MAX, GRID.WIDTH)),
-            max(SCREEN.HEIGHT_MIN, min(SCREEN.HEIGHT_MAX, GRID.HEIGHT + PANEL.HEIGHT))
+            max(SCREEN.WIDTH_MIN, min(SCREEN.WIDTH_MAX, GRID.WIDTH + 2 * SCREEN.MARGIN)),
+            max(SCREEN.HEIGHT_MIN, min(SCREEN.HEIGHT_MAX, GRID.HEIGHT + PANEL.HEIGHT + SCREEN.MARGIN))
         )
 
     SCREEN.WIDTH, SCREEN.HEIGHT = SCREEN.RESOLUTION
 
     SCREEN.X_CENTER = SCREEN.WIDTH // 2
     SCREEN.Y_CENTER = SCREEN.HEIGHT // 2
-    SCREEN.X_TOP_LEFT = SCREEN.X_CENTER - GRID.WIDTH // 2
-    SCREEN.Y_TOP_LEFT = SCREEN.Y_CENTER - (PANEL.HEIGHT + GRID.HEIGHT) // 2
+    SCREEN.X_TOP_LEFT = SCREEN.X_CENTER - (GRID.WIDTH + 2 * SCREEN.MARGIN) // 2
+    SCREEN.Y_TOP_LEFT = SCREEN.Y_CENTER - (PANEL.HEIGHT + GRID.HEIGHT + SCREEN.MARGIN) // 2
 
-    PANEL.X_TOP_LEFT = SCREEN.X_TOP_LEFT
+    # PANEL.X_TOP_LEFT = SCREEN.X_TOP_LEFT + SCREEN.MARGIN
+    PANEL.X_TOP_LEFT = SCREEN.X_CENTER - PANEL.WIDTH // 2
     PANEL.Y_TOP_LEFT = SCREEN.Y_TOP_LEFT
 
-    GRID.X_TOP_LEFT = SCREEN.X_TOP_LEFT
+    GRID.X_TOP_LEFT = SCREEN.X_TOP_LEFT + SCREEN.MARGIN
     GRID.Y_TOP_LEFT = SCREEN.Y_TOP_LEFT + PANEL.HEIGHT
 
 
