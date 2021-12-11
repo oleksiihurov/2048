@@ -6,7 +6,7 @@ import pygame as pg
 import pygame_gui as pgui
 
 # Project imports
-from config import TILE, PANEL
+from config import TILE, PANEL, SCREEN
 
 
 # --- GUI ---------------------------------------------------------------------
@@ -37,8 +37,8 @@ class GUI:
         if PANEL.IS_PRESENT:
             self.create_panel()
             self.create_score()
-            self.create_new_game_button()
             self.create_undo_button()
+            self.create_new_game_button()
 
     def draw(self):
         """Drawing user interface to the screen surface."""
@@ -76,8 +76,8 @@ class GUI:
     def create_score(self):
         """Creating score panel with info labels on it."""
 
-        panel_score_rect = pg.Rect(0, 0, TILE.SIZE_4x4, 70)
-        panel_score_rect.topright = (PANEL.WIDTH - 2 * TILE.PADDING_4x4 - TILE.SIZE_4x4, 30)
+        panel_score_rect = pg.Rect(0, 0, 2 * TILE.SIZE_4x4 + TILE.PADDING_4x4, 70)
+        panel_score_rect.topright = (PANEL.WIDTH - TILE.PADDING_4x4, 30)
         self.panel_score = pgui.elements.UIPanel(
             relative_rect = panel_score_rect,
             starting_layer_height = 2,
@@ -110,26 +110,33 @@ class GUI:
     def update_score(self, score: int):
         self.label_score_value.set_text(str(score))
 
-    def create_new_game_button(self):
-        """Creating [New Game] button."""
-
-        button_new_game_rect = pg.Rect(0, 0, TILE.SIZE_4x4, 50)
-        button_new_game_rect.topright = (PANEL.WIDTH - TILE.PADDING_4x4, 30)
-        self.button_new_game = pgui.elements.UIButton(
-            relative_rect = button_new_game_rect,
-            text = 'New Game',
-            manager = self.manager,
-            container = self.panel
-        )
-
     def create_undo_button(self):
         """Creating [Undo] button."""
 
         button_undo_rect = pg.Rect(0, 0, TILE.SIZE_4x4, 50)
-        button_undo_rect.topright = (PANEL.WIDTH - TILE.PADDING_4x4, 30 + 60)
+        button_undo_rect.bottomleft = (
+            TILE.PADDING_4x4,
+            PANEL.HEIGHT - SCREEN.MARGIN
+        )
         self.button_undo = pgui.elements.UIButton(
             relative_rect = button_undo_rect,
             text = 'Undo',
+            manager = self.manager,
+            container = self.panel
+        )
+        self.button_undo.hide()
+
+    def create_new_game_button(self):
+        """Creating [New Game] button."""
+
+        button_new_game_rect = pg.Rect(0, 0, TILE.SIZE_4x4, 50)
+        button_new_game_rect.bottomright = (
+            PANEL.WIDTH - TILE.PADDING_4x4,
+            PANEL.HEIGHT - SCREEN.MARGIN
+        )
+        self.button_new_game = pgui.elements.UIButton(
+            relative_rect = button_new_game_rect,
+            text = 'New Game',
             manager = self.manager,
             container = self.panel
         )

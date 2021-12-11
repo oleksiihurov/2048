@@ -22,7 +22,7 @@ class Demo:
         self.is_move_done = False
 
         # Setup graphics
-        self.game = Game(GAME.COLS, GAME.ROWS)
+        self.game = Game(GAME)
         self.graphics = Graphics(SCREEN.RESOLUTION)
         self.gui = GUI(self.graphics.screen)
 
@@ -58,14 +58,24 @@ class Demo:
                     self.is_move_done = self.game.right()
                 if event.key == pg.K_LEFT:
                     self.is_move_done = self.game.left()
+                if event.key == pg.K_BACKSPACE:
+                    self.game.pop_from_history()
+                    self.gui.update_score(self.game.stats.score)
+                    if not self.game.is_history_there():
+                        self.gui.button_undo.hide()
 
             # events from GUI
             if event.type == pg.USEREVENT:
                 if event.user_type == pgui.UI_BUTTON_PRESSED:
                     if event.ui_element == self.gui.button_new_game:
-                        print('[New Game]')
+                        self.game.new_game()
+                        self.gui.update_score(self.game.stats.score)
+                        self.gui.button_undo.hide()
                     if event.ui_element == self.gui.button_undo:
-                        print('[Undo]')
+                        self.game.pop_from_history()
+                        self.gui.update_score(self.game.stats.score)
+                        if not self.game.is_history_there():
+                            self.gui.button_undo.hide()
 
             self.gui.manager.process_events(event)
         self.gui.manager.update(self.graphics.time_delta)
@@ -83,6 +93,8 @@ class Demo:
         if self.is_move_done:
             self.gui.update_score(self.game.stats.score)
             self.game.generate_new_tile(self.game.choose_tile())
+            if self.game.undo:
+                self.gui.button_undo.show()
         if self.game.is_game_lost():
             self.game.game_lost_procedure()
             self.is_running = False

@@ -8,8 +8,12 @@ import json
 class GAME:
     """Set of constants for Game."""
 
+    # matrix size
     ROWS = 4  # 2 <= ROWS <= 16
     COLS = 4  # 2 <= COLS <= 16
+
+    # number of available undo operations
+    UNDO = 10  # 0 <= UNDO <= 10
 
 
 @dataclass

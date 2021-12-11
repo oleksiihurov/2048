@@ -1,5 +1,7 @@
 # System imports
 from enum import Enum, auto
+from collections import deque
+from copy import copy
 
 # External imports
 import numpy as np
@@ -27,6 +29,8 @@ class MOVE(Enum):
 # --- Game classes ------------------------------------------------------------
 
 class Stats:
+    """Game statistics."""
+
     def __init__(self):
         self.score = 0
         self.score_incremental = 0
@@ -40,9 +44,9 @@ class Stats:
 
 class Game:
 
-    def __init__(self, cols: int, rows: int):
+    def __init__(self, game):
 
-        self.cols, self.rows = cols, rows
+        # game matrix
         #    x→          y,x
         #   ┌───┬───┬───┬───┐
         # y │0,0│0,1│0,2│   │
@@ -64,53 +68,66 @@ class Game:
         #   │   │   │   │ 2 │
         #   └───┴───┴───┴───┘
         #    matrix = [[512, 256, 128, 64], [4, 8, 16, 32], [2, 0, 0, 0], [0, 0, 0, 2]]
+        self.cols = game.COLS
+        self.rows = game.ROWS
         self.matrix = np.empty(
-            shape=(self.rows, self.cols),
-            dtype=MAX_POWER_TYPE
+            shape = (self.rows, self.cols),
+            dtype = MAX_POWER_TYPE
         )
 
+        # game statistics
         self.stats = Stats()
 
-        self.init_matrix()
-        # self.test_matrix()
-        # self.predefined_matrix()
+        # game history for undo operation
+        self.undo = game.UNDO
+        self.history_matrix = deque(maxlen=self.undo) if self.undo else None
+        self.history_stats = deque(maxlen=self.undo) if self.undo else None
+
+        self.new_game()
 
     # --- Matrix initialization methods ---------------------------------------
+
+    # def test_matrix(self):
+    #     self.clear_matrix()
+    #     max_power = self.rows * self.cols - 1
+    #     test_list = [2 << i for i in range(max_power)]
+    #     test_list = test_list[::-1]
+    #     test_list = test_list + [0]
+    #     self.matrix = np.array(test_list).reshape((self.rows, self.cols))
+    #
+    # def predefined_matrix(self):
+    #     self.clear_matrix()
+    #     self.matrix = np.array([
+    #         [2, 0, 0, 2],
+    #         [32, 16, 8, 4],
+    #         [64, 128, 256, 512],
+    #         [8192, 4096, 2048, 1024]
+    #     ])
 
     def clear_matrix(self):
         """
         Erase matrix by filling zeros.
         """
         self.matrix = np.zeros(
-            shape=(self.rows, self.cols),
-            dtype=MAX_POWER_TYPE
+            shape = (self.rows, self.cols),
+            dtype = MAX_POWER_TYPE
         )
+
+    def clear_stats(self):
+        """
+        Erase game statistics.
+        """
         self.stats.erase()
 
-    def init_matrix(self):
+    def new_game(self):
         """
         Initialize matrix with two new tiles in grid.
         """
         self.clear_matrix()
+        self.clear_stats()
+        self.clear_history()
         self.generate_new_tile()
         self.generate_new_tile()
-
-    def test_matrix(self):
-        self.clear_matrix()
-        max_power = self.rows * self.cols - 1
-        test_list = [2 << i for i in range(max_power)]
-        test_list = test_list[::-1]
-        test_list = test_list + [0]
-        self.matrix = np.array(test_list).reshape((self.rows, self.cols))
-
-    def predefined_matrix(self):
-        self.clear_matrix()
-        self.matrix = np.array([
-            [2, 0, 0, 2],
-            [32, 16, 8, 4],
-            [64, 128, 256, 512],
-            [8192, 4096, 2048, 1024]
-        ])
 
     def generate_new_tile(self, tile=2):
         """
@@ -277,6 +294,8 @@ class Game:
 
         # Step 1: preparation to the move
         done1 = done2 = done3 = 0
+        backup_matrix = copy(self.matrix)
+        backup_stats = copy(self.stats)
         self.stats.score_incremental = 0
 
         # Step 2: orientation of the matrix before the move
@@ -314,6 +333,7 @@ class Game:
         self.stats.score += self.stats.score_incremental
         if done:
             self.stats.move[move] += 1
+            self.put_to_history(backup_matrix, backup_stats)
 
         return done
 
@@ -344,3 +364,30 @@ class Game:
         Return True/False as indication of any changes made.
         """
         return self._move(MOVE.LEFT)
+
+    # --- History methods -----------------------------------------------------
+
+    def put_to_history(self, matrix, stats):
+        if self.undo:
+            self.history_matrix.append(matrix)
+            self.history_stats.append(stats)
+
+    def pop_from_history(self) -> bool:
+        if self.undo:
+            if len(self.history_matrix):
+                self.matrix = self.history_matrix.pop()
+                self.stats = self.history_stats.pop()
+                return True
+            else:
+                return False
+
+    def is_history_there(self) -> bool:
+        if self.undo:
+            return bool(len(self.history_matrix))
+        else:
+            return False
+
+    def clear_history(self):
+        if self.undo:
+            self.history_matrix.clear()
+            self.history_stats.clear()

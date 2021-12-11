@@ -6,7 +6,7 @@ import numpy as np
 import pygame as pg
 
 # Project imports
-from config import GAME, TILE, GRID, PANEL, SCREEN
+from config import GAME, TILE, GRID, SCREEN
 
 
 # --- Graphics ----------------------------------------------------------------
