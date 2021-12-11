@@ -16,7 +16,7 @@ class GAME:
 class TILE:
     """Set of constants for particular Tile of the Grid."""
 
-    # base size in pixels for the grid 4x4
+    # base size in pixels for the original grid 4x4
     SIZE_4x4 = 123
     # fraction from Tile's size
     PADDING_FRACTION = 0.12
@@ -55,8 +55,8 @@ class GRID:
     WIDTH = None  # will be calculated further
     HEIGHT = None  # will be calculated further
 
-    X_TOP_LEFT = 0  # might be redefined in SCREEN due to IS_PRESENT flag
-    Y_TOP_LEFT = 0  # might be redefined in SCREEN due to IS_PRESENT flag
+    X_TOP_LEFT = None  # will be calculated further
+    Y_TOP_LEFT = None  # will be calculated further
 
     BG_COLOR = '#bbada0'
 
@@ -71,8 +71,8 @@ class PANEL:
     WIDTH = None  # will be calculated further
     HEIGHT = 140 if IS_PRESENT else 0
 
-    X_TOP_LEFT = 0  # might be redefined in SCREEN due to IS_PRESENT flag
-    Y_TOP_LEFT = 0  # might be redefined in SCREEN due to IS_PRESENT flag
+    X_TOP_LEFT = None  # will be calculated further
+    Y_TOP_LEFT = None  # will be calculated further
 
     BG_COLOR = '#ffffff'
 
@@ -118,6 +118,8 @@ class SCREEN:
     X_TOP_LEFT = None  # will be calculated further
     Y_TOP_LEFT = None  # will be calculated further
 
+    BG_COLOR = '#000000'
+
     # frames per second
     FPS = 60
 
@@ -155,12 +157,12 @@ def calculating_the_scale_multiplier():
             GRID.HEIGHT = GRID.HEIGHT_4x4 + (GAME.ROWS - 4) * (_GRID_HEIGHT_16x16 - GRID.HEIGHT_4x4) / (16 - 4)
             # GRID.HEIGHT == GAME.ROWS * TILE.SIZE + (GAME.ROWS + 1) * int(TILE.SIZE * TILE.PADDING_FRACTION)
             TILE.SIZE = int(GRID.HEIGHT / (GAME.ROWS + (GAME.ROWS + 1) * TILE.PADDING_FRACTION))
+
     else:  # grid size == 4
         TILE.SIZE = TILE.SIZE_4x4  # to avoid rounding error
 
-    TILE.PADDING = int(TILE.SIZE * TILE.PADDING_FRACTION)
-
     # Step 4: recalculating GRID dimensions according to rounded TILE.SIZE
+    TILE.PADDING = int(TILE.SIZE * TILE.PADDING_FRACTION)
     GRID.WIDTH = GAME.COLS * TILE.SIZE + (GAME.COLS + 1) * TILE.PADDING
     GRID.HEIGHT = GAME.ROWS * TILE.SIZE + (GAME.ROWS + 1) * TILE.PADDING
 
@@ -188,11 +190,11 @@ def calculating_the_scale_multiplier():
     SCREEN.X_TOP_LEFT = SCREEN.X_CENTER - GRID.WIDTH // 2
     SCREEN.Y_TOP_LEFT = SCREEN.Y_CENTER - (PANEL.HEIGHT + GRID.HEIGHT) // 2
 
-    if PANEL.IS_PRESENT:  # redefining due to IS_PRESENT flag
-        PANEL.X_TOP_LEFT = SCREEN.X_TOP_LEFT
-        PANEL.Y_TOP_LEFT = SCREEN.Y_TOP_LEFT
-        GRID.X_TOP_LEFT = SCREEN.X_TOP_LEFT
-        GRID.Y_TOP_LEFT = SCREEN.Y_TOP_LEFT + PANEL.HEIGHT
+    PANEL.X_TOP_LEFT = SCREEN.X_TOP_LEFT
+    PANEL.Y_TOP_LEFT = SCREEN.Y_TOP_LEFT
+
+    GRID.X_TOP_LEFT = SCREEN.X_TOP_LEFT
+    GRID.Y_TOP_LEFT = SCREEN.Y_TOP_LEFT + PANEL.HEIGHT
 
 
 # -----------------------------------------------------------------------------

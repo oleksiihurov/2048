@@ -3,7 +3,7 @@ import pygame as pg
 import numpy as np
 
 # Project imports
-from config import GAME
+from config import GAME, SCREEN
 from game import Game
 from graphics import Graphics
 
@@ -16,13 +16,18 @@ class Demo:
 
         # Setup process
         self.is_running = True  # running main program flag
+        self.is_mousemotion = False  # flag of the mouse pointer movement event
         self.is_move_done = False
+
+        # Setup graphics
         self.game = Game(GAME.COLS, GAME.ROWS)
-        self.graphics = Graphics()
+        self.graphics = Graphics(SCREEN.RESOLUTION)
 
     def loop_handler(self):
         """Resetting flags. Ticking internal clock by FPS."""
+        self.is_mousemotion = False
         self.is_move_done = False
+        self.graphics.clock_tick()
         return self.is_running
 
     def events_handler(self):
@@ -32,6 +37,11 @@ class Demo:
             # events from main window
             if event.type == pg.QUIT:
                 self.is_running = False
+                break
+
+            # events from mouse
+            if event.type == pg.MOUSEMOTION:
+                self.is_mousemotion = True
 
             # events from keyboard
             if event.type == pg.KEYDOWN:

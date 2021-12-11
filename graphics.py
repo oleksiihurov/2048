@@ -13,19 +13,24 @@ from config import GAME, TILE, GRID, PANEL, SCREEN
 class Graphics:
     """Setup of pygame graphics."""
 
-    def __init__(self):
+    def __init__(self, resolution: tuple[int, int]):
+        """Initializing pygame graphics."""
 
-        # Setup pygame graphics
+        # Initialization pygame display
         environ['SDL_VIDEO_CENTERED'] = '1'  # centering pygame window
         pg.init()
         if SCREEN.FULL_SCREEN_MODE:
-            self.screen = pg.display.set_mode(SCREEN.RESOLUTION, pg.FULLSCREEN)
+            self.screen = pg.display.set_mode(resolution, pg.FULLSCREEN)
         else:
-            self.screen = pg.display.set_mode(SCREEN.RESOLUTION)
+            self.screen = pg.display.set_mode(resolution)
 
         # Taskbar appearance
         pg.display.set_caption('2048')
         pg.display.set_icon(pg.image.load(path.join('assets', 'favicon.ico')))
+
+        # Setup process
+        self.clock = pg.time.Clock()
+        self.time_delta = None
 
         self.draw_background()
         if PANEL.IS_PRESENT:
@@ -38,7 +43,9 @@ class Graphics:
     def draw_background(self):
         """Drawing background to the screen surface."""
 
-        # self.screen.fill(pg.Color(GRID.BG_COLOR))
+        self.screen.fill(
+            pg.Color(SCREEN.BG_COLOR)
+        )
         self.screen.fill(
             pg.Color(PANEL.BG_COLOR),
             (PANEL.X_TOP_LEFT, PANEL.Y_TOP_LEFT, PANEL.WIDTH, PANEL.HEIGHT)
@@ -47,6 +54,10 @@ class Graphics:
             pg.Color(GRID.BG_COLOR),
             (GRID.X_TOP_LEFT, GRID.Y_TOP_LEFT, GRID.WIDTH, GRID.HEIGHT)
         )
+
+    def clock_tick(self):
+        """Ticking clock. Also calculating time_delta for GUI elements."""
+        self.time_delta = self.clock.tick(SCREEN.FPS) / 1000.0
 
     @staticmethod
     def show():

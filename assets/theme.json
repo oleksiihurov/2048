@@ -1,0 +1,31 @@
+{
+    "panel": {
+        "colours": {
+            "dark_bg": "#ffffff",
+            "normal_border": "#ffffff"
+        },
+        "misc": {
+            "shape": "rectangle",
+            "shape_corner_radius": "0",
+            "border_width": "1",
+            "shadow_width": "0"
+        }
+    },
+
+    "label": {
+        "font": {
+            "name": "ClearSansBold",
+            "size": "16",
+            "regular_path": "assets/ClearSansBold.ttf"
+        },
+         "misc": {
+            "text_shadow": "0",
+            "text_shadow_size": "0",
+            "text_shadow_offset": "0,0"
+        }
+    },
+
+    "label_2048": {
+
+    }
+}
