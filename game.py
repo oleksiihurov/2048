@@ -13,9 +13,9 @@ import numpy as np
 # default value: 2 ** 32 = 4_294_967_295
 MAX_POWER = 32
 
-# appropriate numpy dtype for that value
-# default value: np.uint32 = 4 bytes
-MAX_POWER_TYPE = np.uint32
+# appropriate numpy dtype enough for a power of that value
+# default value: np.uint16 = 2 bytes
+MAX_POWER_TYPE = np.uint16
 
 
 # supported moves: up, down, right, left
@@ -31,22 +31,22 @@ class MOVE(Enum):
 class Stats:
     """Game statistics."""
 
-    def __init__(self):
+    def __init__(self, rows: int, cols: int):
         self.score = 0
         self.score_incremental = 0
         self.move = {move: 0 for move in MOVE}
         self.moves_idle = 0
-        self.merge = {4 << i: 0 for i in range(MAX_POWER - 1)}
+        self.merge = {i + 2: 0 for i in range(rows * cols + 1)}
 
-    def erase(self):
-        self.__init__()
+    def erase(self, rows: int, cols: int):
+        self.__init__(rows, cols)
 
 
 class Game:
 
     def __init__(self, game):
 
-        # game matrix
+        # game matrix, which contains just powers of '2' - not the value itself
         #    x→          y,x
         #   ┌───┬───┬───┬───┐
         # y │0,0│0,1│0,2│   │
@@ -67,7 +67,7 @@ class Game:
         #   ├───┼───┼───┼───┤
         #   │   │   │   │ 2 │
         #   └───┴───┴───┴───┘
-        #    matrix = [[512, 256, 128, 64], [4, 8, 16, 32], [2, 0, 0, 0], [0, 0, 0, 2]]
+        #    matrix = [[9, 8, 7, 6], [2, 3, 4, 5], [1, 0, 0, 0], [0, 0, 0, 1]]
         self.cols = game.COLS
         self.rows = game.ROWS
         self.matrix = np.empty(
@@ -76,7 +76,7 @@ class Game:
         )
 
         # game statistics
-        self.stats = Stats()
+        self.stats = Stats(self.rows, self.cols)
 
         # game history for undo operation
         self.undo = game.UNDO
@@ -89,55 +89,39 @@ class Game:
     # --- Matrix initialization methods ---------------------------------------
 
     def test_matrix(self):
-        """ Grid: 6x6 """
-        self.rows = self.cols = 6
+        """Matrix filled up by all tiles for testing purposes..."""
         self.clear_matrix()
         self.clear_stats()
         self.clear_history()
-        max_power = self.rows * self.cols - 1
-        test_list = [2 << i for i in range(max_power)]
-        test_list = test_list[::-1]
-        test_list = test_list + [0]
-        self.matrix = np.array(test_list).reshape((self.rows, self.cols))
-
-    # def predefined_matrix(self):
-    #     self.clear_matrix()
-    #     self.matrix = np.array([
-    #         [2, 0, 0, 2],
-    #         [32, 16, 8, 4],
-    #         [64, 128, 256, 512],
-    #         [8192, 4096, 2048, 1024]
-    #     ])
+        max_power = self.rows * self.cols - 2
+        test_list = [i + 1 for i in range(max_power)]
+        test_list = [0] + [1] + test_list
+        test_matrix = np.array(test_list).reshape((self.rows, self.cols))
+        for y in range(1, test_matrix.shape[0], 2):
+            test_matrix[y, :] = test_matrix[y, :][::-1]
+        self.matrix = test_matrix
 
     def clear_matrix(self):
-        """
-        Erase matrix by filling zeros.
-        """
+        """Erase matrix by filling zeros."""
         self.matrix = np.zeros(
             shape = (self.rows, self.cols),
             dtype = MAX_POWER_TYPE
         )
 
     def clear_stats(self):
-        """
-        Erase game statistics.
-        """
-        self.stats.erase()
+        """Erase game statistics."""
+        self.stats.erase(self.rows, self.cols)
 
     def new_game(self):
-        """
-        Initialize matrix with two new tiles in grid.
-        """
+        """Initialize matrix with two new tiles in grid."""
         self.clear_matrix()
         self.clear_stats()
         self.clear_history()
         self.generate_new_tile()
         self.generate_new_tile()
 
-    def generate_new_tile(self, tile=2):
-        """
-        Generate new tile on a random empty place in the matrix.
-        """
+    def generate_new_tile(self, tile=1):
+        """Generate new tile on a random empty place in the matrix."""
         if 0 in self.matrix:
             while True:
                 x = np.random.randint(self.cols)
@@ -150,10 +134,10 @@ class Game:
     def choose_tile():
         """
         Return next generated tile
-        with 90% probability of '2'
-        and 10% probability of '4'.
+        with 90% probability of '1'
+        and 10% probability of '2'.
         """
-        return np.random.choice([2, 4], p=[0.9, 0.1])
+        return np.random.choice([1, 2], p=[0.9, 0.1])
 
     # --- Checking game state methods -----------------------------------------
 
@@ -275,11 +259,11 @@ class Game:
         for y in range(rows):
             for x in range(cols - 1):
                 if self.matrix[y, x] and self.matrix[y, x] == self.matrix[y, x + 1]:
-                    self.matrix[y, x] *= 2
+                    self.matrix[y, x] += 1
                     self.matrix[y, x + 1] = 0
 
                     done = True
-                    self.stats.score_incremental += self.matrix[y, x]
+                    self.stats.score_incremental += 2 ** int(self.matrix[y, x])
                     self.stats.merge[self.matrix[y, x]] += 1
 
         return done
@@ -373,11 +357,19 @@ class Game:
     # --- History methods -----------------------------------------------------
 
     def put_to_history(self, matrix, stats):
+        """
+        Saving to history of moves:
+        current state of matrix and statistics.
+        """
         if self.undo:
             self.history_matrix.append(matrix)
             self.history_stats.append(stats)
 
     def pop_from_history(self) -> bool:
+        """
+        Retrieving from history of moves:
+        the most recent state of matrix and statistics.
+        """
         if self.undo:
             if len(self.history_matrix):
                 self.matrix = self.history_matrix.pop()
@@ -387,12 +379,18 @@ class Game:
                 return False
 
     def is_history_there(self) -> bool:
+        """
+        Checking if history stacks have any recently saved information.
+        """
         if self.undo:
             return bool(len(self.history_matrix))
         else:
             return False
 
     def clear_history(self):
+        """
+        Erasing history stacks.
+        """
         if self.undo:
             self.history_matrix.clear()
             self.history_stats.clear()

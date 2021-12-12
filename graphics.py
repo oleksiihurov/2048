@@ -103,7 +103,7 @@ class Graphics:
     def prepare_tiles(self):
         """Pre-drawing all possible tiles for the game."""
 
-        tiles_list = [0] + [2 << i for i in range((GAME.ROWS * GAME.COLS))]
+        tiles_list = [0] + [i + 1 for i in range((GAME.ROWS * GAME.COLS))]
         for tile in tiles_list:
 
             tile_surface = pg.Surface((TILE.SIZE, TILE.SIZE), pg.SRCALPHA)

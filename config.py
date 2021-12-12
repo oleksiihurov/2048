@@ -42,10 +42,12 @@ class TILE:
         obj = json.load(json_file)
     FONT_COLOR = {int(k): v for k, v in obj.items()}
 
+    # with open(path.join('assets', 'TileFontSizesAlternative.json'), 'r') as json_file:
     with open(path.join('assets', 'TileFontSizes.json'), 'r') as json_file:
         obj = json.load(json_file)
     FONT_SIZE_4x4 = {int(k): v for k, v in obj.items()}
 
+    # with open(path.join('assets', 'TileValuesAlternative.json'), 'r') as json_file:
     with open(path.join('assets', 'TileValues.json'), 'r') as json_file:
         obj = json.load(json_file)
     VALUE = {int(k): v for k, v in obj.items()}
@@ -101,7 +103,7 @@ class SCREEN:
     WIDTH_MIN = 590
     HEIGHT_MIN = 200
 
-    WIDTH_MAX = MONITOR_WIDTH if FULL_SCREEN_MODE else MONITOR_WIDTH - 10
+    WIDTH_MAX = MONITOR_WIDTH if FULL_SCREEN_MODE else MONITOR_WIDTH - 100
     HEIGHT_MAX = MONITOR_HEIGHT if FULL_SCREEN_MODE else MONITOR_HEIGHT - 100
 
     # SCREEN dimensions
