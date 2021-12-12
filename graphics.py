@@ -92,6 +92,14 @@ class Graphics:
             result = TILE.FONT_SIZE_4x4[-1]
         return int(result * TILE.SCALE)
 
+    @staticmethod
+    def get_tile_value(tile):
+        try:
+            result = TILE.VALUE[tile]
+        except KeyError:
+            result = TILE.VALUE[-1]
+        return result
+
     def prepare_tiles(self):
         """Pre-drawing all possible tiles for the game."""
 
@@ -102,11 +110,19 @@ class Graphics:
             tile_rect = tile_surface.get_rect()
 
             pg.draw.rect(
-                surface=tile_surface,
-                color=self.get_tile_color(tile),
-                rect=tile_rect,
-                border_radius=3
+                surface = tile_surface,
+                color = self.get_tile_color(tile),
+                rect = tile_rect,
+                border_radius = 3
             )
+
+            # pg.draw.rect(
+            #     surface = tile_surface,
+            #     color = self.get_tile_font_color(tile),
+            #     rect = tile_rect,
+            #     width = 1,
+            #     border_radius = 3
+            # )
 
             if tile:
                 font = pg.font.Font(
@@ -114,7 +130,7 @@ class Graphics:
                     self.get_tile_font_size(tile)
                 )
                 text = font.render(
-                    str(tile),
+                    self.get_tile_value(tile),
                     True,
                     self.get_tile_font_color(tile)
                 )

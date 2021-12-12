@@ -46,6 +46,10 @@ class TILE:
         obj = json.load(json_file)
     FONT_SIZE_4x4 = {int(k): v for k, v in obj.items()}
 
+    with open(path.join('assets', 'TileValues.json'), 'r') as json_file:
+        obj = json.load(json_file)
+    VALUE = {int(k): v for k, v in obj.items()}
+
 
 @dataclass
 class GRID:
