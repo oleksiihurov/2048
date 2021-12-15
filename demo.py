@@ -4,10 +4,11 @@ import pygame as pg
 import pygame_gui as pgui
 
 # Project imports
-from config import GAME, SCREEN
+from config import GAME, SCREEN, ANIMATION
 from game import Game
 from graphics import Graphics
 from gui import GUI
+from animation import Animation
 
 
 # --- Demo --------------------------------------------------------------------
@@ -25,6 +26,7 @@ class Demo:
         self.game = Game(GAME)
         self.graphics = Graphics(SCREEN.RESOLUTION)
         self.gui = GUI(self.graphics.screen)
+        self.animation = Animation()
 
     def loop_handler(self):
         """Resetting flags. Ticking internal clock by FPS."""
@@ -93,8 +95,14 @@ class Demo:
         if self.is_move_done:
             self.gui.update_score(self.game.stats.score)
             self.game.generate_new_tile(self.game.choose_tile())
-            if self.game.undo:
+            if ANIMATION.IS_PRESENT:
+                self.animation.start(self.game.tiles)
+            if GAME.UNDO:
                 self.gui.button_undo.show()
+        else:
+            if ANIMATION.IS_PRESENT:
+                self.animation.next()
+
         if self.game.is_game_lost():
             self.game.game_lost_procedure()
             self.is_running = False
@@ -102,5 +110,8 @@ class Demo:
     def graphics_handler(self):
         """Redrawing the screen."""
         self.gui.draw()
-        self.graphics.draw_grid(self.game.matrix)
+        if ANIMATION.IS_PRESENT:
+            self.graphics.draw_board_animation(self.animation.tiles)
+        else:
+            self.graphics.draw_grid(self.game.matrix)
         self.graphics.show()

@@ -6,7 +6,7 @@ import numpy as np
 import pygame as pg
 
 # Project imports
-from config import GAME, TILE, GRID, SCREEN
+from config import GAME, TILE, GRID, SCREEN, ANIMATION
 
 
 # --- Graphics ----------------------------------------------------------------
@@ -59,7 +59,7 @@ class Graphics:
 
     def clock_tick(self):
         """Ticking clock. Also calculating time_delta for GUI elements."""
-        self.time_delta = self.clock.tick(SCREEN.FPS) / 1000.0
+        self.time_delta = self.clock.tick(ANIMATION.FPS) / 1000.0
 
     @staticmethod
     def show():
@@ -158,3 +158,6 @@ class Graphics:
                 )
 
                 self.screen.blit(tile_surface, tile_rect)
+
+    def draw_board_animation(self, board):
+        pass

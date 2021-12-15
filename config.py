@@ -120,8 +120,19 @@ class SCREEN:
 
     BG_COLOR = '#faf8ef'
 
+
+@dataclass
+class ANIMATION:
+    """Set of constants for Animation."""
+
+    IS_PRESENT = False
+
     # frames per second
     FPS = 60
+
+    # how much time it takes (in seconds) for each of animation stage
+    TIME_MOVING = 1.0
+    TIME_ARISING = 1.0
 
 
 # -----------------------------------------------------------------------------
