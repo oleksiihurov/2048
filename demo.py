@@ -5,7 +5,7 @@ import pygame_gui as pgui
 
 # Project imports
 from config import GAME, SCREEN, ANIMATION
-from game import Game
+from game import MOVE, Game
 from graphics import Graphics
 from gui import GUI
 from animation import Animation
@@ -20,7 +20,7 @@ class Demo:
         # Setup process
         self.is_running = True  # running main program flag
         self.is_mousemotion = False  # flag of the mouse pointer movement event
-        self.is_move_done = False
+        self.move = MOVE.NONE
 
         # Setup graphics
         self.game = Game(GAME)
@@ -31,7 +31,7 @@ class Demo:
     def loop_handler(self):
         """Resetting flags. Ticking internal clock by FPS."""
         self.is_mousemotion = False
-        self.is_move_done = False
+        self.move = MOVE.NONE
         self.graphics.clock_tick()
         return self.is_running
 
@@ -53,13 +53,13 @@ class Demo:
                 if event.key == pg.K_ESCAPE:
                     self.is_running = False
                 if event.key == pg.K_UP:
-                    self.is_move_done = self.game.up()
+                    self.move = self.game.up()
                 if event.key == pg.K_DOWN:
-                    self.is_move_done = self.game.down()
+                    self.move = self.game.down()
                 if event.key == pg.K_RIGHT:
-                    self.is_move_done = self.game.right()
+                    self.move = self.game.right()
                 if event.key == pg.K_LEFT:
-                    self.is_move_done = self.game.left()
+                    self.move = self.game.left()
                 if event.key == pg.K_BACKSPACE:
                     self.game.pop_from_history()
                     self.gui.update_score(self.game.stats.score)
@@ -85,18 +85,18 @@ class Demo:
     def actions_handler(self):
         """Program actions in the main loop."""
 
-        # self.is_move_done = {
+        # self.move = {
         #     0: self.game.up,
         #     1: self.game.down,
         #     2: self.game.right,
         #     3: self.game.left,
         # }.get(np.random.randint(4))()
 
-        if self.is_move_done:
+        if self.move is not MOVE.NONE:
             self.gui.update_score(self.game.stats.score)
             self.game.generate_new_tile(self.game.choose_tile())
             if ANIMATION.IS_PRESENT:
-                self.animation.start(self.game.tiles)
+                self.animation.start(self.game.tiles, self.move)
             if GAME.UNDO:
                 self.gui.button_undo.show()
         else:

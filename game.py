@@ -21,6 +21,7 @@ MAX_POWER_TYPE = np.uint16
 
 class MOVE(Enum):
     """Supported tile moves in the grid: up, down, right, left."""
+    NONE = 0
     UP = auto()
     DOWN = auto()
     RIGHT = auto()
@@ -37,7 +38,7 @@ class Stats:
         self.moves_idle = 0
         self.merge = {i + 2: 0 for i in range(rows * cols + 1)}
 
-    def erase(self, rows: int, cols: int):
+    def reset(self, rows: int, cols: int):
         self.__init__(rows, cols)
 
 
@@ -49,7 +50,8 @@ class Tile:
             value: int,
             row_from: int, col_from: int,
             row_to: Union[None, int] = None, col_to: Union[None, int] = None,
-            new = False
+            moving = False,
+            arising = False
     ):
         """
         Tile object for animation.
@@ -59,17 +61,23 @@ class Tile:
         :param col_from: starting column in the grid for the tile
         :param row_to: target row in the grid for the tile after moving
         :param col_to: target column in the grid for the tile after moving
-        :param new: flag: is it newly appeared tile or not
+        :param moving: flag: is this tile going to move or not?
+        :param arising: flag: is it newly appeared tile or not?
         """
         self.value = value
-        self.new = new
 
         self.row_from, self.col_from = row_from, col_from
         self.row_to, self.col_to = row_to, col_to
 
+        self.moving = moving
+        self.arising = arising
+
         # graphics coords [x, y] of the tile related to GRID position
         # change during moving animation phase
+        self.x_from = self.y_from = 0
         self.x = self.y = 0
+        # number of rows or columns needed to move during animation
+        self.distance = 0
         # graphics resize multiplier of the tile surface on the GRID
         # changes during arising animation phase
         self.scale = 1.0
@@ -147,8 +155,8 @@ class Game:
         )
 
     def clear_stats(self):
-        """Erase game statistics."""
-        self.stats.erase(self.rows, self.cols)
+        """Erasing game statistics."""
+        self.stats.reset(self.rows, self.cols)
 
     def new_game(self):
         """Initialize matrix with two new tiles in grid."""
@@ -170,7 +178,7 @@ class Game:
                         Tile(
                             value = self.matrix[row, col],
                             row_from = row, col_from = col,
-                            new = True
+                            arising = True
                         )
                     )
 
@@ -263,6 +271,7 @@ class Game:
         [print(f'{k} = {v}') for k, v in self.stats.move.items()]
         print()
         pprint({k: v for k, v in self.stats.merge.items() if v})
+        # TODO rework
 
     # --- Operations over matrix methods  -------------------------------------
 
@@ -335,9 +344,11 @@ class Game:
                             if tile.row_from == row:
                                 if tile.col_to is not None:
                                     if tile.col_to == col:
+                                        tile.moving = True
                                         tile.col_to = col_new
                                 else:
                                     if tile.col_from == col:
+                                        tile.moving = True
                                         tile.col_to = col_new
 
                         done = True
@@ -375,16 +386,18 @@ class Game:
                         if tile.row_from == row:
                             if tile.col_to is not None:
                                 if tile.col_to == col + 1:
+                                    tile.moving = True
                                     tile.col_to = col
                             else:
                                 if tile.col_from == col + 1:
+                                    tile.moving = True
                                     tile.col_to = col
 
                     self.tiles.append(
                         Tile(
                             value = self.matrix[row, col],
                             row_from = row, col_from = col,
-                            new = True
+                            arising = True
                         )
                     )
 
@@ -401,39 +414,39 @@ class Game:
     # Reverse/transpose matrix operations should be performed in correct order.
     # After all matrix have to be transposed/reversed back to original orientation.
 
-    def up(self) -> bool:
+    def up(self) -> MOVE:
         """
         Shift tiles in the grid up.
-        Return True/False as indication of any changes made.
+        Return type of MOVE as indication of any changes made.
         """
         return self._move(MOVE.UP)
 
-    def down(self) -> bool:
+    def down(self) -> MOVE:
         """
         Shift tiles in the grid down.
-        Return True/False as indication of any changes made.
+        Return type of MOVE as indication of any changes made.
         """
         return self._move(MOVE.DOWN)
 
-    def right(self) -> bool:
+    def right(self) -> MOVE:
         """
         Shift tiles in the grid to the right.
-        Return True/False as indication of any changes made.
+        Return type of MOVE as indication of any changes made.
         """
         return self._move(MOVE.RIGHT)
 
-    def left(self) -> bool:
+    def left(self) -> MOVE:
         """
         Shift tiles in the grid to the left.
-        Return True/False as indication of any changes made.
+        Return type of MOVE as indication of any changes made.
         """
         return self._move(MOVE.LEFT)
 
-    def _move(self, move: MOVE) -> bool:
+    def _move(self, move: MOVE) -> MOVE:
         """
         Internal wrapper for all four moves:
         up, down, right or left accordingly.
-        Return True/False as indication of any changes made.
+        Return type of MOVE as indication of any changes made.
         """
 
         # Step 1: preparation to the move
@@ -490,5 +503,8 @@ class Game:
         if done:
             self.stats.move[move] += 1
             self.put_to_history(backup_matrix, backup_stats)
+            result = move
+        else:
+            result = MOVE.NONE
 
-        return done
+        return result

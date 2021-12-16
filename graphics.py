@@ -153,8 +153,8 @@ class Graphics:
                     raise KeyError(f"Can't find predefined tile surface for the matrix value: {matrix[y, x]}")
                 tile_rect = tile_surface.get_rect()
                 tile_rect.center = (
-                    GRID.X_TOP_LEFT + TILE.PADDING + x * (TILE.SIZE + TILE.PADDING) + TILE.SIZE // 2,
-                    GRID.Y_TOP_LEFT + TILE.PADDING + y * (TILE.SIZE + TILE.PADDING) + TILE.SIZE // 2
+                    GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + x * (TILE.SIZE + TILE.PADDING),
+                    GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + y * (TILE.SIZE + TILE.PADDING)
                 )
 
                 self.screen.blit(tile_surface, tile_rect)
