@@ -30,8 +30,9 @@ class Animation:
 
         # fpp - frames per phase.
         self.fpp_moving = int(ANIMATION.TIME_MOVING * ANIMATION.FPS)
-        self.fpp_arising = int(ANIMATION.TIME_MOVING * ANIMATION.FPS)
+        self.fpp_arising = int(ANIMATION.TIME_ARISING * ANIMATION.FPS)
 
+        # lists of corresponding changes in animated frames
         self.moving_coords = self.calculate_fpp_moving_coords()
         self.arising_scales = self.calculate_fpp_arising_scales()
 
@@ -102,40 +103,61 @@ class Animation:
         """Starting new animation procedure."""
 
         # Step 1: interruption of any previous animation
-        if self.phase is not PHASE.FINISH:
-            self.reset()
+        self.reset()
 
         # Step 2: starting new animation
         self.tiles = tiles
         self.move = move
 
+        # preparation of all the graphics attributes for tiles
         for tile in self.tiles:
 
-            # calculating coords [x, y] for all tiles
-            tile.x = tile.x_from = \
-                GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
-                tile.col_from * (TILE.SIZE + TILE.PADDING)
-            tile.y = tile.y_from = \
-                GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
-                tile.row_from * (TILE.SIZE + TILE.PADDING)
+            # during moving phase we do show arising tiles
+            if tile.arising:
+                tile.show = False
 
-            # filling up distance for moving tiles
+            # calculating distances for moving tiles
             if tile.moving:
                 if tile.row_to is not None:
                     tile.distance = abs(tile.row_to - tile.row_from)
                 else:  # tile.col_to is not None
                     tile.distance = abs(tile.col_to - tile.col_from)
 
+            # filling up row_to & col_to empty values
+            if tile.row_to is None:
+                tile.row_to = tile.row_from
+            if tile.col_to is None:
+                tile.col_to = tile.col_from
+
+            # calculating coords [x, y] for all tiles
+            tile.x_from = \
+                GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+                tile.col_from * (TILE.SIZE + TILE.PADDING)
+            tile.y_from = \
+                GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+                tile.row_from * (TILE.SIZE + TILE.PADDING)
+
+            tile.x = tile.x_from
+            tile.y = tile.y_from
+
+            tile.x_to = \
+                GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+                tile.col_to * (TILE.SIZE + TILE.PADDING)
+            tile.y_to = \
+                GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+                tile.row_to * (TILE.SIZE + TILE.PADDING)
+
         self.next()
 
     def next(self):
         """Performing the following animation step."""
 
+        # Step 1: skipping if animation was already finished
         if self.phase == PHASE.FINISH:
             return
 
+        # Step 2: moving phase of animation
         if self.phase == PHASE.MOVING:
-
             for tile in self.tiles:
                 if tile.moving:
                     if self.move == MOVE.UP:
@@ -151,23 +173,30 @@ class Animation:
                         tile.x = tile.x_from - \
                                  self.moving_coords[tile.distance][self.frame]
 
-        # next slide of animation
+        # Step 3: arising phase of animation
+        if self.phase == PHASE.ARISING:
+            for tile in self.tiles:
+                if tile.arising:
+                    tile.scale = self.arising_scales[self.frame]
 
-        # next phase of animation
-
-        # case when no arising tiles exist at all
-
+        # Step 4: next frame for further animation
         self.frame += 1
 
-        # Step 3: checking switch to the next phase
+        # Step 5: checking switch to the next phase
         if self.phase == PHASE.MOVING:
-            if self.frame == self.fpp_moving:
+            if self.frame >= self.fpp_moving:
                 self.phase = PHASE.ARISING
+                self.finish()
         if self.phase == PHASE.ARISING:
-            if self.frame == self.fpp_arising:
+            if self.frame >= self.fpp_arising:
                 self.phase = PHASE.FINISH
                 self.finish()
 
     def finish(self):
         """Setting all the tiles to their final static positions."""
-        pass
+        self.frame = 0
+        for tile in self.tiles:
+            tile.show = True
+            tile.x = tile.x_to
+            tile.y = tile.y_to
+            tile.scale = 1

@@ -131,7 +131,7 @@ class ANIMATION:
     FPS = 60
 
     # how much time it takes (in seconds) for each of animation stage
-    TIME_MOVING = 1.0
+    TIME_MOVING = 0.5
     TIME_ARISING = 1.0
 
 

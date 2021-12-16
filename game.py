@@ -73,15 +73,18 @@ class Tile:
         self.moving = moving
         self.arising = arising
 
+        # number of rows or columns needed to move during animation
+        self.distance = 0
         # graphics coords [x, y] of the tile related to GRID position
         # change during moving animation phase
         self.x_from = self.y_from = 0
         self.x = self.y = 0
-        # number of rows or columns needed to move during animation
-        self.distance = 0
+        self.x_to = self.y_to = 0
         # graphics resize multiplier of the tile surface on the GRID
         # changes during arising animation phase
-        self.scale = 1.0
+        self.scale = 1
+        # flag for showing tile
+        self.show = True
 
 
 # --- Game class --------------------------------------------------------------
@@ -291,9 +294,9 @@ class Game:
 
         # doing the same transformation for the list of Tile objects
         for tile in self.tiles:
-            tile.col_from = self.cols - tile.col_from
+            tile.col_from = (self.cols - 1) - tile.col_from
             if tile.col_to is not None:
-                tile.col_to = self.cols - tile.col_to
+                tile.col_to = (self.cols - 1) - tile.col_to
 
     def transpose_matrix(self):
         """

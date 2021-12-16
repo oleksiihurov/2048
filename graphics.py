@@ -34,13 +34,14 @@ class Graphics:
         self.clock = pg.time.Clock()
         self.time_delta = None
 
-        self.draw_background()
-
         # preparing surfaces of tiles
-        self.tiles = dict()
+        self.tile_surfaces = dict()
         self.prepare_tiles()
 
-    def draw_background(self):
+        self.draw_screen_background()
+        self.grid_background_surface_rect = self.draw_grid_background()
+
+    def draw_screen_background(self):
         """Drawing background to the screen surface."""
 
         self.screen.fill(
@@ -48,15 +49,52 @@ class Graphics:
             (0, 0, SCREEN.WIDTH, SCREEN.HEIGHT)
         )
 
+    def draw_grid_background(self):
+        """Drawing background for the grid."""
+
+        grid_background_surface = pg.Surface(
+            (GRID.WIDTH, GRID.HEIGHT),
+            pg.SRCALPHA
+        )
+
         pg.draw.rect(
-            surface = self.screen,
+            surface = grid_background_surface,
             color = pg.Color(GRID.BG_COLOR),
             rect = (
-                GRID.X_TOP_LEFT, GRID.Y_TOP_LEFT,
+                0, 0,
                 GRID.WIDTH, GRID.HEIGHT
             ),
             border_radius = 7
         )
+
+        empty_tile_surface = self.tile_surfaces[0]
+
+        for row in range(GAME.ROWS):
+            for col in range(GAME.COLS):
+                empty_tile_rect = empty_tile_surface.get_rect()
+                empty_tile_rect.center = (
+                    TILE.PADDING + TILE.SIZE // 2 +
+                    col * (TILE.SIZE + TILE.PADDING),
+                    TILE.PADDING + TILE.SIZE // 2 +
+                    row * (TILE.SIZE + TILE.PADDING)
+                )
+
+                grid_background_surface.blit(
+                    empty_tile_surface,
+                    empty_tile_rect
+                )
+
+        grid_background_rect = grid_background_surface.get_rect()
+        grid_background_rect.topleft = (
+            GRID.X_TOP_LEFT,
+            GRID.Y_TOP_LEFT
+        )
+        self.screen.blit(
+            grid_background_surface,
+            grid_background_rect
+        )
+
+        return (grid_background_surface, grid_background_rect)
 
     def clock_tick(self):
         """Ticking clock. Also calculating time_delta for GUI elements."""
@@ -139,26 +177,42 @@ class Graphics:
                 text_rect.center = (TILE.SIZE // 2, TILE.SIZE // 2)
                 tile_surface.blit(text, text_rect)
 
-            self.tiles[tile] = tile_surface
+            self.tile_surfaces[tile] = tile_surface
 
     def draw_grid(self, matrix: np.ndarray):
         """Drawing grid on the screen."""
 
         rows, cols = matrix.shape
-        for y in range(rows):
-            for x in range(cols):
-
+        for row in range(rows):
+            for col in range(cols):
                 try:
-                    tile_surface = self.tiles[matrix[y, x]]
+                    tile_surface = self.tile_surfaces[matrix[row, col]]
                 except KeyError:
-                    raise KeyError(f"Can't find predefined tile surface for the matrix value: {matrix[y, x]}")
+                    raise KeyError(f"Can't find predefined tile surface"
+                                   f" for the matrix value: {matrix[row, col]}")
                 tile_rect = tile_surface.get_rect()
                 tile_rect.center = (
-                    GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + x * (TILE.SIZE + TILE.PADDING),
-                    GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + y * (TILE.SIZE + TILE.PADDING)
+                    GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 +
+                    col * (TILE.SIZE + TILE.PADDING),
+                    GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 +
+                    row * (TILE.SIZE + TILE.PADDING)
                 )
 
                 self.screen.blit(tile_surface, tile_rect)
 
     def animate_tiles(self, tiles: list[Tile]):
-        pass
+        """Animating tiles on the screen."""
+
+        self.screen.blit(*self.grid_background_surface_rect)
+
+        for tile in tiles:
+            if tile.show:
+                try:
+                    tile_surface = self.tile_surfaces[tile.value]
+                except KeyError:
+                    raise KeyError(f"Can't find predefined tile surface"
+                                   f" for the tile value: {tile.value}")
+                tile_rect = tile_surface.get_rect()
+                tile_rect.center = (tile.x, tile.y)
+
+                self.screen.blit(tile_surface, tile_rect)
