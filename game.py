@@ -69,6 +69,7 @@ class Tile:
         self.row_from, self.col_from = row_from, col_from
         self.row_to, self.col_to = row_to, col_to
 
+        # marking corresponding animation phases
         self.moving = moving
         self.arising = arising
 

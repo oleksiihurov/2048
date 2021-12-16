@@ -70,6 +70,7 @@ class Animation:
         """
 
         def func(arg) -> float:
+            # TODO remake: (1) start not from 0 (2) sequence of sine functions
             """
             argument must be in a range: 0.0 <= arg <= 1.0
             return value in a range: 0.0 <= value <~ 1.2
@@ -92,11 +93,13 @@ class Animation:
 
     def reset(self):
         """Erasing everything for new animation."""
+
         self.tiles.clear()
         self.phase = PHASE.MOVING
         self.frame = 0
 
     def start(self, tiles: list[Tile], move: MOVE):
+        """Starting new animation procedure."""
 
         # Step 1: interruption of any previous animation
         if self.phase is not PHASE.FINISH:
@@ -123,17 +126,48 @@ class Animation:
                 else:  # tile.col_to is not None
                     tile.distance = abs(tile.col_to - tile.col_from)
 
-        # TODO
-
         self.next()
 
     def next(self):
+        """Performing the following animation step."""
+
+        if self.phase == PHASE.FINISH:
+            return
+
+        if self.phase == PHASE.MOVING:
+
+            for tile in self.tiles:
+                if tile.moving:
+                    if self.move == MOVE.UP:
+                        tile.y = tile.y_from - \
+                                 self.moving_coords[tile.distance][self.frame]
+                    elif self.move == MOVE.DOWN:
+                        tile.y = tile.y_from + \
+                                 self.moving_coords[tile.distance][self.frame]
+                    elif self.move == MOVE.RIGHT:
+                        tile.x = tile.x_from + \
+                                 self.moving_coords[tile.distance][self.frame]
+                    elif self.move == MOVE.LEFT:
+                        tile.x = tile.x_from - \
+                                 self.moving_coords[tile.distance][self.frame]
 
         # next slide of animation
 
         # next phase of animation
 
-        pass
+        # case when no arising tiles exist at all
+
+        self.frame += 1
+
+        # Step 3: checking switch to the next phase
+        if self.phase == PHASE.MOVING:
+            if self.frame == self.fpp_moving:
+                self.phase = PHASE.ARISING
+        if self.phase == PHASE.ARISING:
+            if self.frame == self.fpp_arising:
+                self.phase = PHASE.FINISH
+                self.finish()
 
     def finish(self):
+        """Setting all the tiles to their final static positions."""
         pass
