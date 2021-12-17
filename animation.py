@@ -95,13 +95,16 @@ class Animation:
     def reset(self):
         """Erasing everything for new animation."""
 
-        self.tiles.clear()
+        # self.tiles.clear()
         self.phase = PHASE.MOVING
         self.frame = 0
 
     def start(self, tiles: list[Tile], move: MOVE):
         """Starting new animation procedure."""
 
+        # print()
+        # print(f'{tiles = }')
+        print(f'{move = }')
         # Step 1: interruption of any previous animation
         self.reset()
 

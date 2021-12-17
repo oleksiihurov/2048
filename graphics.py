@@ -212,6 +212,11 @@ class Graphics:
                 except KeyError:
                     raise KeyError(f"Can't find predefined tile surface"
                                    f" for the tile value: {tile.value}")
+                if tile.scale != 1:
+                    tile_surface = pg.transform.scale(
+                        tile_surface,
+                        (tile.scale * TILE.SIZE, tile.scale * TILE.SIZE)
+                    )
                 tile_rect = tile_surface.get_rect()
                 tile_rect.center = (tile.x, tile.y)
 

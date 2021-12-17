@@ -185,7 +185,6 @@ class Game:
                             arising = True
                         )
                     )
-
                     break
 
     @staticmethod
