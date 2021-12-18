@@ -1,6 +1,4 @@
 # System imports
-from typing import Union
-from enum import Enum, auto
 from collections import deque
 from copy import copy
 
@@ -9,7 +7,7 @@ import numpy as np
 
 # Project imports
 from config import MOVE
-
+from tiles import Tiles
 
 # --- Constants and Additional classes ----------------------------------------
 
@@ -36,49 +34,49 @@ class Stats:
         self.__init__(rows, cols)
 
 
-class Tile:
-    """Tile object for animation."""
-
-    def __init__(
-            self,
-            value: int,
-            row_from: int, col_from: int,
-            row_to: Union[None, int] = None, col_to: Union[None, int] = None,
-            moving = False,
-            arising = False
-    ):
-        """
-        Tile object for animation.
-
-        :param value: value from the appropriate self.matrix[row, col] cell
-        :param row_from: starting row in the grid for the tile
-        :param col_from: starting column in the grid for the tile
-        :param row_to: target row in the grid for the tile after moving
-        :param col_to: target column in the grid for the tile after moving
-        :param moving: flag: is this tile going to move or not?
-        :param arising: flag: is it newly appeared tile or not?
-        """
-        self.value = value
-
-        self.row_from, self.col_from = row_from, col_from
-        self.row_to, self.col_to = row_to, col_to
-
-        # marking corresponding animation phases
-        self.moving = moving
-        self.arising = arising
-
-        # number of rows or columns needed to move during animation
-        self.distance = 0
-        # graphics coords [x, y] of the tile related to GRID position
-        # change during moving animation phase
-        self.x_from = self.y_from = 0
-        self.x = self.y = 0
-        self.x_to = self.y_to = 0
-        # graphics resize multiplier of the tile surface on the GRID
-        # changes during arising animation phase
-        self.scale = 1
-        # flag for showing tile
-        self.show = True
+# class Tile:
+#     """Tile object for animation."""
+#
+#     def __init__(
+#             self,
+#             value: int,
+#             row_from: int, col_from: int,
+#             row_to: Union[None, int] = None, col_to: Union[None, int] = None,
+#             moving = False,
+#             arising = False
+#     ):
+#         """
+#         Tile object for animation.
+#
+#         :param value: value from the appropriate self.matrix[row, col] cell
+#         :param row_from: starting row in the grid for the tile
+#         :param col_from: starting column in the grid for the tile
+#         :param row_to: target row in the grid for the tile after moving
+#         :param col_to: target column in the grid for the tile after moving
+#         :param moving: flag: is this tile going to move or not?
+#         :param arising: flag: is it newly appeared tile or not?
+#         """
+#         self.value = value
+#
+#         self.row_from, self.col_from = row_from, col_from
+#         self.row_to, self.col_to = row_to, col_to
+#
+#         # marking corresponding animation phases
+#         self.moving = moving
+#         self.arising = arising
+#
+#         # number of rows or columns needed to move during animation
+#         self.distance = 0
+#         # graphics coords [x, y] of the tile related to GRID position
+#         # change during moving animation phase
+#         self.x_from = self.y_from = 0
+#         self.x = self.y = 0
+#         self.x_to = self.y_to = 0
+#         # graphics resize multiplier of the tile surface on the GRID
+#         # changes during arising animation phase
+#         self.scale = 1
+#         # flag for showing tile
+#         self.show = True
 
 
 # --- Game class --------------------------------------------------------------
@@ -125,8 +123,8 @@ class Game:
         self.history_matrix = deque(maxlen=self.undo) if self.undo else None
         self.history_stats = deque(maxlen=self.undo) if self.undo else None
 
-        # another game board representation as objects for animation
-        self.tiles: list[Tile] = list()
+        # tiles representation as objects for animation
+        self.tiles = Tiles(self.rows, self.cols)
 
         self.new_game()
         # self.test_matrix()
@@ -145,6 +143,7 @@ class Game:
         for y in range(1, test_matrix.shape[0], 2):
             test_matrix[y, :] = test_matrix[y, :][::-1]
         self.matrix = test_matrix
+        self.tiles.copy_from_matrix(self.matrix)
 
     def clear_matrix(self):
         """Erase matrix by filling zeros."""
@@ -165,21 +164,15 @@ class Game:
         self.generate_new_tile()
         self.generate_new_tile()
 
-    def generate_new_tile(self, tile=1):
+    def generate_new_tile(self, value=1):
         """Generate new tile on a random empty place in the matrix."""
         if 0 in self.matrix:
             while True:
                 row = np.random.randint(self.rows)
                 col = np.random.randint(self.cols)
                 if not self.matrix[row, col]:
-                    self.matrix[row, col] = tile
-                    self.tiles.append(
-                        Tile(
-                            value = self.matrix[row, col],
-                            row_from = row, col_from = col,
-                            arising = True
-                        )
-                    )
+                    self.matrix[row, col] = value
+                    self.tiles.arise_tile(row, col, value)
                     break
 
     @staticmethod
@@ -285,12 +278,7 @@ class Game:
         #   │ 8 │ 9 │ 10│ 11│           │ 11│ 10│ 9 │ 8 │
         #   └───┴───┴───┴───┘           └───┴───┴───┴───┘
         self.matrix = np.fliplr(self.matrix)
-
-        # doing the same transformation for the list of Tile objects
-        for tile in self.tiles:
-            tile.col_from = (self.cols - 1) - tile.col_from
-            if tile.col_to is not None:
-                tile.col_to = (self.cols - 1) - tile.col_to
+        self.tiles.reverse()
 
     def transpose_matrix(self):
         """
@@ -306,11 +294,7 @@ class Game:
         #                                   │ 3 │ 7 │ 11│
         #                                   └───┴───┴───┘
         self.matrix = np.transpose(self.matrix)
-
-        # doing the same transformation for the list of Tile objects
-        for tile in self.tiles:
-            tile.row_from, tile.col_from = tile.col_from, tile.row_from
-            tile.row_to, tile.col_to = tile.col_to, tile.row_to
+        self.tiles.transpose()
 
     def compress_tiles(self) -> bool:
         """
@@ -338,16 +322,18 @@ class Game:
                     matrix_new[row, col_new] = self.matrix[row, col]
 
                     if col_new != col:
-                        for tile in self.tiles:
-                            if tile.row_from == row:
-                                if tile.col_to is not None:
-                                    if tile.col_to == col:
-                                        tile.moving = True
-                                        tile.col_to = col_new
-                                else:
-                                    if tile.col_from == col:
-                                        tile.moving = True
-                                        tile.col_to = col_new
+                        self.tiles.move_tile(row, col, row, col_new)
+
+                        # for tile in self.tiles:
+                        #     if tile.row_from == row:
+                        #         if tile.col_to is not None:
+                        #             if tile.col_to == col:
+                        #                 tile.moving = True
+                        #                 tile.col_to = col_new
+                        #         else:
+                        #             if tile.col_from == col:
+                        #                 tile.moving = True
+                        #                 tile.col_to = col_new
 
                         done = True
 
@@ -376,28 +362,35 @@ class Game:
 
         for row in range(rows):
             for col in range(cols - 1):
-                if self.matrix[row, col] and self.matrix[row, col] == self.matrix[row, col + 1]:
+                if self.matrix[row, col] and \
+                        self.matrix[row, col] == self.matrix[row, col + 1]:
                     self.matrix[row, col] += 1
                     self.matrix[row, col + 1] = 0
 
-                    for tile in self.tiles:
-                        if tile.row_from == row:
-                            if tile.col_to is not None:
-                                if tile.col_to == col + 1:
-                                    tile.moving = True
-                                    tile.col_to = col
-                            else:
-                                if tile.col_from == col + 1:
-                                    tile.moving = True
-                                    tile.col_to = col
-
-                    self.tiles.append(
-                        Tile(
-                            value = self.matrix[row, col],
-                            row_from = row, col_from = col,
-                            arising = True
-                        )
+                    self.tiles.move_tile(row, col + 1, row, col)
+                    self.tiles.arise_tile(
+                        row, col,
+                        self.tiles.get_value(row, col) + 1
                     )
+
+                    # for tile in self.tiles:
+                    #     if tile.row_from == row:
+                    #         if tile.col_to is not None:
+                    #             if tile.col_to == col + 1:
+                    #                 tile.moving = True
+                    #                 tile.col_to = col
+                    #         else:
+                    #             if tile.col_from == col + 1:
+                    #                 tile.moving = True
+                    #                 tile.col_to = col
+                    #
+                    # self.tiles.append(
+                    #     Tile(
+                    #         value = self.matrix[row, col],
+                    #         row_from = row, col_from = col,
+                    #         arising = True
+                    #     )
+                    # )
 
                     done = True
 
@@ -450,17 +443,6 @@ class Game:
         # Step 1: preparation to the move
         backup_matrix = copy(self.matrix)
         backup_stats = copy(self.stats)
-
-        self.tiles.clear()
-        for row in range(self.rows):
-            for col in range(self.cols):
-                if self.matrix[row, col]:
-                    self.tiles.append(
-                        Tile(
-                            value = self.matrix[row, col],
-                            row_from = row, col_from = col
-                        )
-                    )
 
         done1 = done2 = done3 = 0
         self.stats.score_incremental = 0

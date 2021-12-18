@@ -8,7 +8,6 @@ from config import GAME, SCREEN, ANIMATION, MOVE
 from game import Game
 from graphics import Graphics
 from gui import GUI
-from animation import Animation
 
 
 # --- Demo --------------------------------------------------------------------
@@ -26,7 +25,6 @@ class Demo:
         self.game = Game(GAME)
         self.graphics = Graphics(SCREEN.RESOLUTION)
         self.gui = GUI(self.graphics.screen)
-        self.animation = Animation()
 
     def loop_handler(self):
         """Resetting flags. Ticking internal clock by FPS."""
@@ -96,12 +94,12 @@ class Demo:
             self.gui.update_score(self.game.stats.score)
             self.game.generate_new_tile(self.game.choose_tile())
             if ANIMATION.IS_PRESENT:
-                self.animation.start(self.game.tiles, self.move)
+                self.game.tiles.start_animation(self.move)
             if GAME.UNDO:
                 self.gui.button_undo.show()
         else:
             if ANIMATION.IS_PRESENT:
-                self.animation.next()
+                self.game.tiles.next_animation()
 
         if self.game.is_game_lost():
             self.game.game_lost_procedure()
@@ -111,7 +109,7 @@ class Demo:
         """Redrawing the screen."""
         self.gui.draw()
         if ANIMATION.IS_PRESENT:
-            self.graphics.animate_tiles(self.animation.tiles)
+            self.graphics.animate_tiles(self.game.tiles)
         else:
             self.graphics.draw_grid(self.game.matrix)
         self.graphics.show()

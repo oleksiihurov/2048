@@ -27,9 +27,9 @@ class Tile:
         :param arising: flag: is it newly appeared tile or not?
         """
 
-        # starting row & column in the grid for the tile
+        # starting cell in the grid for the tile
         self.row_from, self.col_from = row_from, col_from
-        # destination row & column in the grid for the moving tile
+        # destination cell in the grid for the moving tile
         self.row_to, self.col_to = row_from, col_from
 
         # corresponding value as base for power of '2'
@@ -137,12 +137,16 @@ class Tiles:
     # --- Operational methods -------------------------------------------------
 
     def _find_index(self, row: int, col: int) -> int:
-        index = None
-        for i, tile in enumerate(self.tiles):
+        # first we search in the destination ('_to') tile-attributes
+        for index, tile in enumerate(self.tiles):
+            if tile.row_to == row and tile.col_to == col:
+                return index
+        # second we search in the current ('_from') tile-attributes
+        for index, tile in enumerate(self.tiles):
             if tile.row_from == row and tile.col_from == col:
-                index = i
-                break
-        return index
+                return index
+        # otherwise it's an exception
+        raise LookupError(f"Can't find any tile on position: {row=}, {col=}")
 
     def get_tile(self, row: int, col: int) -> Tile:
         return self.tiles[self._find_index(row, col)]
@@ -165,11 +169,11 @@ class Tiles:
     def arise_tile(self, row: int, col: int, value: int):
         self.tiles.append(Tile(row, col, value, arising=True))
 
-    def move_tile(self, row_from: int, col_from: int, row_to: int, col_to: int):
-        with self.tiles[self._find_index(row_from, col_from)] as tile:
-            tile.row_to = row_to
-            tile.col_to = col_to
-            tile.moving = True
+    def move_tile(self, row: int, col: int, row_to: int, col_to: int):
+        index = self._find_index(row, col)
+        self.tiles[index].row_to = row_to
+        self.tiles[index].col_to = col_to
+        self.tiles[index].moving = True
 
     def reverse(self):
         for tile in self.tiles:
@@ -187,8 +191,7 @@ class Tiles:
         """Starting new animation procedure."""
 
         # Step 1: interruption of any previous animation
-        self.phase = PHASE.MOVING
-        self.frame = 0
+        self._reset_phase()
 
         # Step 2: starting new animation
         self.move = move
@@ -213,7 +216,68 @@ class Tiles:
                 else:
                     raise ValueError(f"Unexpected move value: {self.move}")
 
-            # calculating coords [x, y] for all tiles
+        self._actualize_coords()
+
+        self.next_animation()
+
+    def next_animation(self):
+        """Performing the next animation slide."""
+
+        # Step 1: skipping if animation was already finished
+        if self.phase == PHASE.FINISH:
+            return
+
+        # Step 2: moving phase of animation
+        if self.phase == PHASE.MOVING:
+            for tile in self.tiles:
+                if tile.moving:
+                    if self.move == MOVE.UP:
+                        tile.y = tile.y_from - \
+                                 self.moving_coords[tile.distance][self.frame]
+                    elif self.move == MOVE.DOWN:
+                        tile.y = tile.y_from + \
+                                 self.moving_coords[tile.distance][self.frame]
+                    elif self.move == MOVE.RIGHT:
+                        tile.x = tile.x_from + \
+                                 self.moving_coords[tile.distance][self.frame]
+                    elif self.move == MOVE.LEFT:
+                        tile.x = tile.x_from - \
+                                 self.moving_coords[tile.distance][self.frame]
+
+        # Step 3: arising phase of animation
+        if self.phase == PHASE.ARISING:
+            for tile in self.tiles:
+                if tile.arising:
+                    tile.scale = self.arising_scales[self.frame]
+
+        # Step 4: next frame for further animation
+        self.frame += 1
+
+        # Step 5: checking switch to the next phase
+        if self.phase == PHASE.MOVING and self.frame >= self.fpp_moving:
+            self._finish_moving()
+            self._next_phase()
+        if self.phase == PHASE.ARISING and self.frame >= self.fpp_arising:
+            self._finish_arising()
+            self._next_phase()
+
+    def _reset_phase(self):
+        self.phase = PHASE.MOVING
+        self.frame = 0
+
+    def _next_phase(self):
+        if self.phase == PHASE.MOVING:
+            self.phase = PHASE.ARISING
+        elif self.phase == PHASE.ARISING:
+            self.phase = PHASE.FINISH
+        self.frame = 0
+
+    def _actualize_coords(self):
+        """
+        Calculating coords [x, y] for all tiles
+        according to rows & columns.
+        """
+        for tile in self.tiles:
             tile.x_from = \
                 GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
                 tile.col_from * (TILE.SIZE + TILE.PADDING)
@@ -231,14 +295,24 @@ class Tiles:
                 GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
                 tile.row_to * (TILE.SIZE + TILE.PADDING)
 
-        self.next_animation()
+    def _finish_moving(self):
+        for tile in self.tiles:
 
-    def next_animation(self):
-        """Performing the next animation slide."""
-        pass
+            # restoring visibility for all tiles
+            tile.show = False
 
-    def finish_moving(self):
-        pass
+            # actualizing cells in the grid for the tile
+            tile.row_from = tile.row_to
+            tile.col_from = tile.col_to
+            tile.distance = 0
 
-    def finish_arising(self):
-        pass
+            tile.moving = False
+
+        self._actualize_coords()
+
+    def _finish_arising(self):
+        for tile in self.tiles:
+
+            # TODO delete overlapping tiles
+
+            tile.arising = False
