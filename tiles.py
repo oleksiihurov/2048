@@ -41,14 +41,17 @@ class Tile:
 
         # number of rows or columns needed to move during animation
         self.distance = 0
+
         # graphics coords [x, y] of the tile related to GRID position
         # change during moving animation phase
         self.x_from = self.y_from = 0
         self.x = self.y = 0
         self.x_to = self.y_to = 0
+
         # graphics resize multiplier of the tile surface on the GRID
         # changes during arising animation phase
         self.scale = 1
+
         # flag for showing tile
         self.show = True
 
@@ -60,9 +63,11 @@ class Tiles:
 
     def __init__(self, rows: int, cols: int):
 
+        # defining the "matrix" of tiles
         self.rows, self.cols = rows, cols
         self.tiles: list[Tile] = list()
 
+        # defining current state of animation
         self.move = MOVE.NONE
         self.phase = PHASE.MOVING
         self.frame = 0
@@ -175,3 +180,65 @@ class Tiles:
         for tile in self.tiles:
             tile.row_from, tile.col_from = tile.col_from, tile.row_from
             tile.row_to, tile.col_to = tile.col_to, tile.row_to
+
+    # --- Animation methods ---------------------------------------------------
+
+    def start_animation(self, move: MOVE):
+        """Starting new animation procedure."""
+
+        # Step 1: interruption of any previous animation
+        self.phase = PHASE.MOVING
+        self.frame = 0
+
+        # Step 2: starting new animation
+        self.move = move
+
+        # preparation of all the graphics attributes for tiles
+        for tile in self.tiles:
+
+            # during moving phase we do show arising tiles
+            if tile.arising:
+                tile.show = False
+
+            # calculating distances for moving tiles
+            if tile.moving:
+                if self.move == MOVE.UP:
+                    tile.distance = tile.row_from - tile.row_to
+                elif self.move == MOVE.DOWN:
+                    tile.distance = tile.row_to - tile.row_from
+                elif self.move == MOVE.RIGHT:
+                    tile.distance = tile.col_to - tile.col_from
+                elif self.move == MOVE.LEFT:
+                    tile.distance = tile.col_from - tile.col_to
+                else:
+                    raise ValueError(f"Unexpected move value: {self.move}")
+
+            # calculating coords [x, y] for all tiles
+            tile.x_from = \
+                GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+                tile.col_from * (TILE.SIZE + TILE.PADDING)
+            tile.y_from = \
+                GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+                tile.row_from * (TILE.SIZE + TILE.PADDING)
+
+            tile.x = tile.x_from
+            tile.y = tile.y_from
+
+            tile.x_to = \
+                GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+                tile.col_to * (TILE.SIZE + TILE.PADDING)
+            tile.y_to = \
+                GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+                tile.row_to * (TILE.SIZE + TILE.PADDING)
+
+        self.next_animation()
+
+    def next_animation(self):
+        """Performing the next animation slide."""
+        pass
+
+    def finish_moving(self):
+        pass
+
+    def finish_arising(self):
+        pass
