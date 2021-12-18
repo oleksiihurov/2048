@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from os import path
 import json
+from enum import Enum, auto
 
 
 @dataclass
@@ -133,6 +134,22 @@ class ANIMATION:
     # how much time it takes (in seconds) for each of animation stage
     TIME_MOVING = 1.0
     TIME_ARISING = 2.0
+
+
+class MOVE(Enum):
+    """Supported tile moves in the grid: up, down, right, left."""
+    NONE = 0
+    UP = auto()
+    DOWN = auto()
+    RIGHT = auto()
+    LEFT = auto()
+
+
+class PHASE(Enum):
+    """Sequence of animation phases."""
+    MOVING = auto()
+    ARISING = auto()
+    FINISH = auto()
 
 
 # -----------------------------------------------------------------------------

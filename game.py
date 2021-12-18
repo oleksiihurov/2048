@@ -7,6 +7,9 @@ from copy import copy
 # External imports
 import numpy as np
 
+# Project imports
+from config import MOVE
+
 
 # --- Constants and Additional classes ----------------------------------------
 
@@ -17,15 +20,6 @@ MAX_POWER = 32
 # appropriate numpy dtype enough for a power of that value
 # default value: np.uint16 = 2 bytes
 MAX_POWER_TYPE = np.uint16
-
-
-class MOVE(Enum):
-    """Supported tile moves in the grid: up, down, right, left."""
-    NONE = 0
-    UP = auto()
-    DOWN = auto()
-    RIGHT = auto()
-    LEFT = auto()
 
 
 class Stats:
@@ -93,7 +87,8 @@ class Game:
 
     def __init__(self, game):
 
-        # game matrix, which contains just powers of '2' - not the value itself
+        # game matrix, which contains just base for power of '2'
+        # but not the representative value itself
         #    x→          y,x
         #   ┌───┬───┬───┬───┐
         # y │0,0│0,1│0,2│   │
@@ -463,7 +458,7 @@ class Game:
                     self.tiles.append(
                         Tile(
                             value = self.matrix[row, col],
-                            row_from = row, col_from = col,
+                            row_from = row, col_from = col
                         )
                     )
 

@@ -94,7 +94,7 @@ class Graphics:
             grid_background_rect
         )
 
-        return (grid_background_surface, grid_background_rect)
+        return grid_background_surface, grid_background_rect
 
     def clock_tick(self):
         """Ticking clock. Also calculating time_delta for GUI elements."""

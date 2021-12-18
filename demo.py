@@ -4,8 +4,8 @@ import pygame as pg
 import pygame_gui as pgui
 
 # Project imports
-from config import GAME, SCREEN, ANIMATION
-from game import MOVE, Game
+from config import GAME, SCREEN, ANIMATION, MOVE
+from game import Game
 from graphics import Graphics
 from gui import GUI
 from animation import Animation

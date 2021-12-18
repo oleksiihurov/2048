@@ -1,19 +1,9 @@
-# System imports
-from enum import Enum, auto
-
 # External imports
 from numpy import sin, pi
 
 # Project imports
-from game import MOVE, Tile
-from config import GAME, TILE, GRID, ANIMATION
-
-
-class PHASE(Enum):
-    """Sequence of animation phases."""
-    MOVING = auto()
-    ARISING = auto()
-    FINISH = auto()
+from game import Tile
+from config import GAME, TILE, GRID, ANIMATION, MOVE, PHASE
 
 
 # --- Animation ---------------------------------------------------------------
