@@ -109,7 +109,7 @@ class Demo:
         """Redrawing the screen."""
         self.gui.draw()
         if ANIMATION.IS_PRESENT:
-            self.graphics.animate_tiles(self.game.tiles)
+            self.graphics.animate_tiles(self.game.tiles.tiles)
         else:
             self.graphics.draw_grid(self.game.matrix)
         self.graphics.show()

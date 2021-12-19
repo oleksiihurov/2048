@@ -7,7 +7,7 @@ import pygame as pg
 
 # Project imports
 from config import GAME, TILE, GRID, SCREEN, ANIMATION
-from tiles import Tiles
+from tiles import Tile
 
 
 # --- Graphics ----------------------------------------------------------------
@@ -200,7 +200,7 @@ class Graphics:
 
                 self.screen.blit(tile_surface, tile_rect)
 
-    def animate_tiles(self, tiles: Tiles):
+    def animate_tiles(self, tiles: list[Tile]):
         """Animating tiles on the screen."""
 
         self.screen.blit(*self.grid_background_surface_rect)

@@ -12,7 +12,7 @@ class Tile:
 
     def __init__(
             self,
-            row_from: int, col_from: int,
+            row: int, col: int,
             value: int,
             moving = False,
             arising = False
@@ -21,16 +21,16 @@ class Tile:
         Tile object for animation.
 
         :param value: value from the appropriate self.matrix[row, col] cell
-        :param row_from: starting row in the grid for the tile
-        :param col_from: starting column in the grid for the tile
+        :param row: starting row in the grid for the tile
+        :param col: starting column in the grid for the tile
         :param moving: flag: is this tile going to move or not?
         :param arising: flag: is it newly appeared tile or not?
         """
 
         # starting cell in the grid for the tile
-        self.row_from, self.col_from = row_from, col_from
+        self.row_from, self.col_from = row, col
         # destination cell in the grid for the moving tile
-        self.row_to, self.col_to = row_from, col_from
+        self.row_to, self.col_to = row, col
 
         # corresponding value as base for power of '2'
         self.value = value
@@ -76,12 +76,12 @@ class Tiles:
         self.fpp_arising = int(ANIMATION.TIME_ARISING * ANIMATION.FPS)
 
         # lists of corresponding changes in animated frames
-        self.moving_coords = self.calculate_fpp_moving_coords()
-        self.arising_scales = self.calculate_fpp_arising_scales()
+        self.moving_coords = self.precalculate_fpp_moving_coords()
+        self.arising_scales = self.precalculate_fpp_arising_scales()
 
     # --- Pre-calculation methods ---------------------------------------------
 
-    def calculate_fpp_moving_coords(self) -> dict[int, list[int]]:
+    def precalculate_fpp_moving_coords(self) -> dict[int, list[int]]:
         """
         Precalculating sequence of delta coords for all the distances,
         needed for moving phase of animation, using specific function.
@@ -107,7 +107,7 @@ class Tiles:
 
         return result
 
-    def calculate_fpp_arising_scales(self) -> list[float]:
+    def precalculate_fpp_arising_scales(self) -> list[float]:
         """
         Precalculating sequence of scale multipliers,
         needed for arising phase of animation, using specific function.
@@ -210,6 +210,11 @@ class Tiles:
             self.tiles[index].row_from * (TILE.SIZE + TILE.PADDING)
 
     def _finish_moving(self):
+        """
+        Finalizing state of tiles
+        to static picture after moving phase.
+        """
+
         for index, tile in enumerate(self.tiles):
 
             if tile.moving:
@@ -220,7 +225,7 @@ class Tiles:
 
                 self._actualize_coords(index)
 
-                # disabling the moving for moved tiles
+                # disabling moving flag once it is done
                 tile.moving = False
 
             # restoring visibility for arising tiles
@@ -228,13 +233,39 @@ class Tiles:
                 tile.show = True
 
     def _finish_arising(self):
+        """
+        Finalizing state of tiles
+        to static picture after arising phase.
+        """
+
+        # Step 1a: looking for overlapping tiles,
+        # which always should be under arising tiles
+        overlapping_cells: list[tuple[int, int]] = []
+        for tile in self.tiles:
+            if tile.arising:
+                overlapping_cells.append((tile.row_from, tile.col_from))
+
+        # Step 1b: retrieving indexes of overlapping tiles to delete
+        overlapping_indexes: list[int] = []
+        for index, tile in enumerate(self.tiles):
+            if not tile.arising:
+                if (tile.row_from, tile.col_from) in overlapping_cells:
+                    overlapping_indexes.append(index)
+        overlapping_indexes.reverse()
+
+        # Step 1c: deleting overlapping tiles by indexes
+        if overlapping_indexes:
+            for index in overlapping_indexes:
+                self.tiles.pop(index)
+
+        # Step 2: finalizing other attributes
         for tile in self.tiles:
 
             if tile.arising:
                 tile.scale = 1
-                tile.arising = False
 
-            # TODO delete overlapping tiles
+                # disabling arising flag once it is done
+                tile.arising = False
 
     def start_animation(self, move: MOVE):
         """Starting new animation procedure."""
