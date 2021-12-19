@@ -34,51 +34,6 @@ class Stats:
         self.__init__(rows, cols)
 
 
-# class Tile:
-#     """Tile object for animation."""
-#
-#     def __init__(
-#             self,
-#             value: int,
-#             row_from: int, col_from: int,
-#             row_to: Union[None, int] = None, col_to: Union[None, int] = None,
-#             moving = False,
-#             arising = False
-#     ):
-#         """
-#         Tile object for animation.
-#
-#         :param value: value from the appropriate self.matrix[row, col] cell
-#         :param row_from: starting row in the grid for the tile
-#         :param col_from: starting column in the grid for the tile
-#         :param row_to: target row in the grid for the tile after moving
-#         :param col_to: target column in the grid for the tile after moving
-#         :param moving: flag: is this tile going to move or not?
-#         :param arising: flag: is it newly appeared tile or not?
-#         """
-#         self.value = value
-#
-#         self.row_from, self.col_from = row_from, col_from
-#         self.row_to, self.col_to = row_to, col_to
-#
-#         # marking corresponding animation phases
-#         self.moving = moving
-#         self.arising = arising
-#
-#         # number of rows or columns needed to move during animation
-#         self.distance = 0
-#         # graphics coords [x, y] of the tile related to GRID position
-#         # change during moving animation phase
-#         self.x_from = self.y_from = 0
-#         self.x = self.y = 0
-#         self.x_to = self.y_to = 0
-#         # graphics resize multiplier of the tile surface on the GRID
-#         # changes during arising animation phase
-#         self.scale = 1
-#         # flag for showing tile
-#         self.show = True
-
-
 # --- Game class --------------------------------------------------------------
 
 class Game:
@@ -328,17 +283,6 @@ class Game:
                     if col_new != col:
                         self.tiles.move_tile(row, col, row, col_new)
 
-                        # for tile in self.tiles:
-                        #     if tile.row_from == row:
-                        #         if tile.col_to is not None:
-                        #             if tile.col_to == col:
-                        #                 tile.moving = True
-                        #                 tile.col_to = col_new
-                        #         else:
-                        #             if tile.col_from == col:
-                        #                 tile.moving = True
-                        #                 tile.col_to = col_new
-
                         done = True
 
                     col_new += 1
@@ -376,25 +320,6 @@ class Game:
                         row, col,
                         self.tiles.get_value(row, col) + 1
                     )
-
-                    # for tile in self.tiles:
-                    #     if tile.row_from == row:
-                    #         if tile.col_to is not None:
-                    #             if tile.col_to == col + 1:
-                    #                 tile.moving = True
-                    #                 tile.col_to = col
-                    #         else:
-                    #             if tile.col_from == col + 1:
-                    #                 tile.moving = True
-                    #                 tile.col_to = col
-                    #
-                    # self.tiles.append(
-                    #     Tile(
-                    #         value = self.matrix[row, col],
-                    #         row_from = row, col_from = col,
-                    #         arising = True
-                    #     )
-                    # )
 
                     done = True
 

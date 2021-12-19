@@ -55,6 +55,8 @@ class Tile:
         # changes during arising animation phase
         self.scale = 1
 
+        # flag for newly added tiles
+        self.new = True
         # flag for showing tile
         self.show = True
 
@@ -212,36 +214,39 @@ class Tiles:
         """
 
         for index, tile in enumerate(self.tiles):
+            if not tile.new:
 
-            if tile.moving:
-                # actualizing cells in the grid for the tile
-                tile.row_from = tile.row_to
-                tile.col_from = tile.col_to
-                tile.distance = 0
+                if tile.moving:
+                    # actualizing cells in the grid for the tile
+                    tile.row_from = tile.row_to
+                    tile.col_from = tile.col_to
+                    tile.distance = 0
 
-                self._actualize_coords(index)
+                    self._actualize_coords(index)
 
-                # disabling moving flag once it is done
-                tile.moving = False
+                    # disabling moving flag once it is done
+                    tile.moving = False
 
-            # restoring visibility for arising tiles
-            if tile.arising:
-                tile.show = True
-                tile.scale = 0
+                # restoring visibility for arising tiles
+                if tile.arising:
+                    tile.show = True
+                    tile.scale = 0
 
         # looking for overlapping tiles,
         # which always should be under arising tiles
         overlapping_cells: list[tuple[int, int]] = []
         for tile in self.tiles:
-            if tile.arising:
-                overlapping_cells.append((tile.row_from, tile.col_from))
+            if not tile.new:
+                if tile.arising:
+                    overlapping_cells.append((tile.row_from, tile.col_from))
 
         # retrieving indexes of overlapping tiles to delete
         overlapping_indexes: list[int] = []
         for index, tile in enumerate(self.tiles):
-            if not tile.arising:
-                if (tile.row_from, tile.col_from) in overlapping_cells:
-                    overlapping_indexes.append(index)
+            if not tile.new:
+                if not tile.arising:
+                    if (tile.row_from, tile.col_from) in overlapping_cells:
+                        overlapping_indexes.append(index)
         overlapping_indexes.reverse()
 
         # deleting overlapping tiles by indexes
@@ -257,12 +262,11 @@ class Tiles:
 
         # Step 2: finalizing other attributes
         for tile in self.tiles:
-
-            if tile.arising:
-                tile.scale = 1
-
-                # disabling arising flag once it is done
-                tile.arising = False
+            if not tile.new:
+                if tile.arising:
+                    tile.scale = 1
+                    # disabling arising flag once it is done
+                    tile.arising = False
 
     def start_animation(self, move: MOVE):
         """Starting new animation procedure."""
@@ -272,6 +276,8 @@ class Tiles:
             self._finish_moving()
             self._finish_arising()
         self._reset_phase()
+        for tile in self.tiles:
+            tile.new = False
 
         # Step 2: starting new animation
         self.move = move
