@@ -46,7 +46,6 @@ class Tile:
         # change during moving animation phase
         self.x_from = self.y_from = 0
         self.x = self.y = 0
-        self.x_to = self.y_to = 0
 
         # graphics resize multiplier of the tile surface on the GRID
         # changes during arising animation phase
@@ -59,7 +58,7 @@ class Tile:
 # --- Tiles -------------------------------------------------------------------
 
 class Tiles:
-    """Alternative way of representing matrix of tiles, using tile objects."""
+    """Alternative way of representing grid of tiles, using tile objects."""
 
     def __init__(self, rows: int, cols: int):
 
@@ -187,17 +186,70 @@ class Tiles:
 
     # --- Animation methods ---------------------------------------------------
 
+    def _reset_phase(self):
+        self.phase = PHASE.MOVING
+        self.frame = 0
+
+    def _next_phase(self):
+        if self.phase == PHASE.MOVING:
+            self.phase = PHASE.ARISING
+        elif self.phase == PHASE.ARISING:
+            self.phase = PHASE.FINISH
+        self.frame = 0
+
+    def _actualize_coords(self, index: int):
+        """
+        Calculating coords [x, y] for the tile
+        according to it's row & column.
+        """
+        self.tiles[index].x = self.tiles[index].x_from = \
+            GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+            self.tiles[index].col_from * (TILE.SIZE + TILE.PADDING)
+        self.tiles[index].y = self.tiles[index].y_from = \
+            GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+            self.tiles[index].row_from * (TILE.SIZE + TILE.PADDING)
+
+    def _finish_moving(self):
+        for index, tile in enumerate(self.tiles):
+
+            if tile.moving:
+                # actualizing cells in the grid for the tile
+                tile.row_from = tile.row_to
+                tile.col_from = tile.col_to
+                tile.distance = 0
+
+                self._actualize_coords(index)
+
+                # disabling the moving for moved tiles
+                tile.moving = False
+
+            # restoring visibility for arising tiles
+            if tile.arising:
+                tile.show = True
+
+    def _finish_arising(self):
+        for tile in self.tiles:
+
+            if tile.arising:
+                tile.scale = 1
+                tile.arising = False
+
+            # TODO delete overlapping tiles
+
     def start_animation(self, move: MOVE):
         """Starting new animation procedure."""
 
         # Step 1: interruption of any previous animation
+        if self.phase is not PHASE.FINISH:
+            self._finish_moving()
+            self._finish_arising()
         self._reset_phase()
 
         # Step 2: starting new animation
         self.move = move
 
         # preparation of all the graphics attributes for tiles
-        for tile in self.tiles:
+        for index, tile in enumerate(self.tiles):
 
             # during moving phase we do show arising tiles
             if tile.arising:
@@ -216,7 +268,7 @@ class Tiles:
                 else:
                     raise ValueError(f"Unexpected move value: {self.move}")
 
-        self._actualize_coords()
+            self._actualize_coords(index)
 
         self.next_animation()
 
@@ -243,6 +295,8 @@ class Tiles:
                     elif self.move == MOVE.LEFT:
                         tile.x = tile.x_from - \
                                  self.moving_coords[tile.distance][self.frame]
+                    else:
+                        raise ValueError(f"Unexpected move value: {self.move}")
 
         # Step 3: arising phase of animation
         if self.phase == PHASE.ARISING:
@@ -260,59 +314,3 @@ class Tiles:
         if self.phase == PHASE.ARISING and self.frame >= self.fpp_arising:
             self._finish_arising()
             self._next_phase()
-
-    def _reset_phase(self):
-        self.phase = PHASE.MOVING
-        self.frame = 0
-
-    def _next_phase(self):
-        if self.phase == PHASE.MOVING:
-            self.phase = PHASE.ARISING
-        elif self.phase == PHASE.ARISING:
-            self.phase = PHASE.FINISH
-        self.frame = 0
-
-    def _actualize_coords(self):
-        """
-        Calculating coords [x, y] for all tiles
-        according to rows & columns.
-        """
-        for tile in self.tiles:
-            tile.x_from = \
-                GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
-                tile.col_from * (TILE.SIZE + TILE.PADDING)
-            tile.y_from = \
-                GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
-                tile.row_from * (TILE.SIZE + TILE.PADDING)
-
-            tile.x = tile.x_from
-            tile.y = tile.y_from
-
-            tile.x_to = \
-                GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
-                tile.col_to * (TILE.SIZE + TILE.PADDING)
-            tile.y_to = \
-                GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
-                tile.row_to * (TILE.SIZE + TILE.PADDING)
-
-    def _finish_moving(self):
-        for tile in self.tiles:
-
-            # restoring visibility for all tiles
-            tile.show = False
-
-            # actualizing cells in the grid for the tile
-            tile.row_from = tile.row_to
-            tile.col_from = tile.col_to
-            tile.distance = 0
-
-            tile.moving = False
-
-        self._actualize_coords()
-
-    def _finish_arising(self):
-        for tile in self.tiles:
-
-            # TODO delete overlapping tiles
-
-            tile.arising = False
