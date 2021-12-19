@@ -44,8 +44,12 @@ class Tile:
 
         # graphics coords [x, y] of the tile related to GRID position
         # change during moving animation phase
-        self.x_from = self.y_from = 0
-        self.x = self.y = 0
+        self.x = self.x_from = \
+            GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+            self.col_from * (TILE.SIZE + TILE.PADDING)
+        self.y = self.y_from = \
+            GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
+            self.row_from * (TILE.SIZE + TILE.PADDING)
 
         # graphics resize multiplier of the tile surface on the GRID
         # changes during arising animation phase
@@ -68,7 +72,7 @@ class Tiles:
 
         # defining current state of animation
         self.move = MOVE.NONE
-        self.phase = PHASE.MOVING
+        self.phase = PHASE.FINISH
         self.frame = 0
 
         # fpp - frames per phase.
@@ -76,23 +80,25 @@ class Tiles:
         self.fpp_arising = int(ANIMATION.TIME_ARISING * ANIMATION.FPS)
 
         # lists of corresponding changes in animated frames
-        self.moving_coords = self.precalculate_fpp_moving_coords()
-        self.arising_scales = self.precalculate_fpp_arising_scales()
+        self.moving_coords = self._precalculate_fpp_moving_coords()
+        self.arising_scales = self._precalculate_fpp_arising_scales()
 
     # --- Pre-calculation methods ---------------------------------------------
 
-    def precalculate_fpp_moving_coords(self) -> dict[int, list[int]]:
+    @staticmethod
+    def _precalculate_function(arg: float, a = 0.0) -> float:
+        """
+        :param arg: must be in a range: 0.0 <= arg <= 1.0
+        :param a: must be in a range: 0.0 <= a <= 1.0
+        :return: value in a range: a <= return <= 1.0
+        """
+        return a + (1 - a) * sin(arg * pi / 2) ** 2
+
+    def _precalculate_fpp_moving_coords(self) -> dict[int, list[int]]:
         """
         Precalculating sequence of delta coords for all the distances,
         needed for moving phase of animation, using specific function.
         """
-
-        def func(arg) -> float:
-            """
-            argument must be in a range: 0.0 <= arg <= 1.0
-            return value in a range: 0.0 <= value <= 1.0
-            """
-            return sin(arg * pi / 2) ** 2
 
         result = dict()
 
@@ -100,34 +106,21 @@ class Tiles:
         for distance in range(1, max_distance):
             length = distance * (TILE.SIZE + TILE.PADDING)
             coords = [
-                int(length * func(delta / self.fpp_moving))
-                for delta in range(self.fpp_moving)
+                int(length * self._precalculate_function(i / self.fpp_moving))
+                for i in range(self.fpp_moving)
             ]
             result[distance] = coords
 
         return result
 
-    def precalculate_fpp_arising_scales(self) -> list[float]:
+    def _precalculate_fpp_arising_scales(self) -> list[float]:
         """
         Precalculating sequence of scale multipliers,
         needed for arising phase of animation, using specific function.
         """
 
-        def func(arg) -> float:
-            # TODO remake: (1) start not from 0 (2) sequence of sine functions
-            """
-            argument must be in a range: 0.0 <= arg <= 1.0
-            return value in a range: 0.0 <= value <~ 1.2
-            """
-            a = 0.8
-            b = (TILE.SIZE + TILE.PADDING) / TILE.SIZE
-            if arg <= a:
-                return arg * b / a
-            else:
-                return 2 * b - arg * b / a
-
         result = [
-            func(i / self.fpp_arising)
+            self._precalculate_function(i / self.fpp_arising, 0.2)
             for i in range(self.fpp_arising)
         ]
 
@@ -164,6 +157,9 @@ class Tiles:
             for col in range(self.cols):
                 if matrix[row, col]:
                     self.tiles.append(Tile(row, col, matrix[row, col]))
+
+    def new_tile(self, row: int, col: int, value: int):
+        self.tiles.append(Tile(row, col, value))
 
     def arise_tile(self, row: int, col: int, value: int):
         self.tiles.append(Tile(row, col, value, arising=True))
@@ -231,21 +227,16 @@ class Tiles:
             # restoring visibility for arising tiles
             if tile.arising:
                 tile.show = True
+                tile.scale = 0
 
-    def _finish_arising(self):
-        """
-        Finalizing state of tiles
-        to static picture after arising phase.
-        """
-
-        # Step 1a: looking for overlapping tiles,
+        # looking for overlapping tiles,
         # which always should be under arising tiles
         overlapping_cells: list[tuple[int, int]] = []
         for tile in self.tiles:
             if tile.arising:
                 overlapping_cells.append((tile.row_from, tile.col_from))
 
-        # Step 1b: retrieving indexes of overlapping tiles to delete
+        # retrieving indexes of overlapping tiles to delete
         overlapping_indexes: list[int] = []
         for index, tile in enumerate(self.tiles):
             if not tile.arising:
@@ -253,10 +244,16 @@ class Tiles:
                     overlapping_indexes.append(index)
         overlapping_indexes.reverse()
 
-        # Step 1c: deleting overlapping tiles by indexes
+        # deleting overlapping tiles by indexes
         if overlapping_indexes:
             for index in overlapping_indexes:
                 self.tiles.pop(index)
+
+    def _finish_arising(self):
+        """
+        Finalizing state of tiles
+        to static picture after arising phase.
+        """
 
         # Step 2: finalizing other attributes
         for tile in self.tiles:

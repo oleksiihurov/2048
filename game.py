@@ -164,15 +164,19 @@ class Game:
         self.generate_new_tile()
         self.generate_new_tile()
 
-    def generate_new_tile(self, value=1):
+    def generate_new_tile(self, value=None):
         """Generate new tile on a random empty place in the matrix."""
         if 0 in self.matrix:
             while True:
                 row = np.random.randint(self.rows)
                 col = np.random.randint(self.cols)
                 if not self.matrix[row, col]:
-                    self.matrix[row, col] = value
-                    self.tiles.arise_tile(row, col, value)
+                    if value is not None:
+                        self.matrix[row, col] = value
+                        self.tiles.arise_tile(row, col, value)
+                    else:
+                        self.matrix[row, col] = 1
+                        self.tiles.new_tile(row, col, 1)
                     break
 
     @staticmethod

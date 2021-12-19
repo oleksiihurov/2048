@@ -133,7 +133,7 @@ class ANIMATION:
 
     # how much time it takes (in seconds) for each of animation stage
     TIME_MOVING = 1.0
-    TIME_ARISING = 2.0
+    TIME_ARISING = 1.0
 
 
 class MOVE(Enum):
