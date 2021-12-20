@@ -1,3 +1,14 @@
+# -----------------------------------------------------------------------------
+# "2048" tribute to original https://2048game.com
+# Copyright (c) Dec 2021 Oleksii Hurov
+# -----------------------------------------------------------------------------
+
+"""
+(I) Input level abstraction.
+Predefined parameters, constants and types.
+"""
+
+
 # System imports
 from dataclasses import dataclass
 from os import path
@@ -10,8 +21,8 @@ class GAME:
     """Set of constants for Game."""
 
     # matrix size
-    ROWS = 5  # 2 <= ROWS <= 16
-    COLS = 6  # 2 <= COLS <= 16
+    ROWS = 4  # 2 <= ROWS <= 16
+    COLS = 4  # 2 <= COLS <= 16
 
     # number of available undo operations
     UNDO = 10  # 0 <= UNDO <= 10

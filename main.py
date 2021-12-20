@@ -1,5 +1,11 @@
+# -----------------------------------------------------------------------------
+# "2048" tribute to original https://2048game.com
+# Copyright (c) Dec 2021 Oleksii Hurov
+# -----------------------------------------------------------------------------
+
 """
-https://2048game.com
+(V) Control level abstraction.
+Main program. Entry point.
 """
 
 

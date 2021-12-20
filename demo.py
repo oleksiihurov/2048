@@ -1,3 +1,14 @@
+# -----------------------------------------------------------------------------
+# "2048" tribute to original https://2048game.com
+# Copyright (c) Dec 2021 Oleksii Hurov
+# -----------------------------------------------------------------------------
+
+"""
+(V) Control level abstraction.
+Main program. Entry point.
+"""
+
+
 # External imports
 import numpy as np
 import pygame as pg
@@ -5,7 +16,7 @@ import pygame_gui as pgui
 
 # Project imports
 from config import GAME, PANEL, SCREEN, ANIMATION, MOVE
-from game import Game
+from logic import Logic
 from graphics import Graphics
 from gui import GUI
 
@@ -22,7 +33,7 @@ class Demo:
         self.move = MOVE.NONE
 
         # Setup graphics
-        self.game = Game(GAME)
+        self.logic = Logic(GAME)
         self.graphics = Graphics(SCREEN.RESOLUTION)
         self.gui = GUI(self.graphics.screen)
 
@@ -53,13 +64,13 @@ class Demo:
                 if event.key == pg.K_ESCAPE:
                     self.is_running = False
                 if event.key == pg.K_UP:
-                    self.move = self.game.up()
+                    self.move = self.logic.up()
                 if event.key == pg.K_DOWN:
-                    self.move = self.game.down()
+                    self.move = self.logic.down()
                 if event.key == pg.K_RIGHT:
-                    self.move = self.game.right()
+                    self.move = self.logic.right()
                 if event.key == pg.K_LEFT:
-                    self.move = self.game.left()
+                    self.move = self.logic.left()
                 if event.key == pg.K_BACKSPACE:
                     self._event_undo()
 
@@ -78,48 +89,48 @@ class Demo:
         """Program actions in the main loop."""
 
         # self.move = {
-        #     0: self.game.up,
-        #     1: self.game.down,
-        #     2: self.game.right,
-        #     3: self.game.left,
+        #     0: self.logic.up,
+        #     1: self.logic.down,
+        #     2: self.logic.right,
+        #     3: self.logic.left,
         # }.get(np.random.randint(4))()
 
         if self.move is not MOVE.NONE:
             if PANEL.IS_PRESENT:
-                self.gui.update_score(self.game.stats.score)
-            self.game.generate_new_tile(self.game.choose_tile())
+                self.gui.update_score(self.logic.stats.score)
+            self.logic.generate_new_tile(self.logic.choose_tile())
             if ANIMATION.IS_PRESENT:
-                self.game.tiles.start_animation()
+                self.logic.tiles.start_animation()
             if PANEL.IS_PRESENT and GAME.UNDO:
                 self.gui.button_undo.show()
         else:
             if ANIMATION.IS_PRESENT:
-                self.game.tiles.next_animation()
+                self.logic.tiles.next_animation()
 
-        if self.game.is_game_lost():
-            self.game.game_lost_procedure()
+        if self.logic.is_game_lost():
+            self.logic.game_lost_procedure()
             self.is_running = False
 
     def graphics_handler(self):
         """Redrawing the screen."""
         self.gui.draw()
         if ANIMATION.IS_PRESENT:
-            self.graphics.animate_tiles(self.game.tiles)
+            self.graphics.animate_tiles(self.logic.tiles)
         else:
-            self.graphics.draw_grid(self.game.matrix)
+            self.graphics.draw_grid(self.logic.matrix)
         self.graphics.show()
 
     # --- Other methods -------------------------------------------------------
 
     def _event_undo(self):
-        self.game.pop_from_history()
+        self.logic.pop_from_history()
         if PANEL.IS_PRESENT:
-            self.gui.update_score(self.game.stats.score)
-            if not self.game.is_history_there():
+            self.gui.update_score(self.logic.stats.score)
+            if not self.logic.is_history_there():
                 self.gui.button_undo.hide()
 
     def _event_new_game(self):
-        self.game.new_game()
+        self.logic.new_game()
         if PANEL.IS_PRESENT:
-            self.gui.update_score(self.game.stats.score)
+            self.gui.update_score(self.logic.stats.score)
             self.gui.button_undo.hide()

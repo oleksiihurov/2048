@@ -1,3 +1,15 @@
+# -----------------------------------------------------------------------------
+# "2048" tribute to original https://2048game.com
+# Copyright (c) Dec 2021 Oleksii Hurov
+# -----------------------------------------------------------------------------
+
+"""
+(IV) Output level abstraction.
+Presentation, graphics & user interface,
+provided by pygame & pygame_gui external modules.
+"""
+
+
 # System imports
 from os import environ, path
 

@@ -1,3 +1,13 @@
+# -----------------------------------------------------------------------------
+# "2048" tribute to original https://2048game.com
+# Copyright (c) Dec 2021 Oleksii Hurov
+# -----------------------------------------------------------------------------
+
+"""
+(III) Logic level abstraction.
+Logic, primary purpose and calculations.
+"""
+
 # System imports
 from collections import deque
 from copy import copy
@@ -21,9 +31,9 @@ MAX_POWER = 32
 MAX_POWER_TYPE = np.uint16
 
 
-# --- Game class --------------------------------------------------------------
+# --- Logic class --------------------------------------------------------------
 
-class Game:
+class Logic:
 
     def __init__(self, game):
 

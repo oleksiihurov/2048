@@ -1,3 +1,14 @@
+# -----------------------------------------------------------------------------
+# "2048" tribute to original https://2048game.com
+# Copyright (c) Dec 2021 Oleksii Hurov
+# -----------------------------------------------------------------------------
+
+"""
+(II) Data level abstraction.
+Data structures and interfaces.
+"""
+
+
 # Project imports
 from config import MOVE
 
