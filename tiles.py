@@ -28,7 +28,7 @@ class Tile:
         """
 
         # starting cell in the grid for the tile
-        self.row_from, self.col_from = row, col
+        self.row, self.col = row, col
         # destination cell in the grid for the moving tile
         self.row_to, self.col_to = row, col
 
@@ -39,26 +39,20 @@ class Tile:
         self.moving = moving
         self.arising = arising
 
-        # number of rows or columns needed to move during animation
+        # number of rows or columns needed to move during moving phase
         self.distance = 0
 
         # graphics coords [x, y] of the tile related to GRID position
         # change during moving animation phase
-        self.x = self.x_from = \
-            GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
-            self.col_from * (TILE.SIZE + TILE.PADDING)
-        self.y = self.y_from = \
-            GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
-            self.row_from * (TILE.SIZE + TILE.PADDING)
+        self.x = self.x_from = 0
+        self.y = self.y_from = 0
 
         # graphics resize multiplier of the tile surface on the GRID
         # changes during arising animation phase
         self.scale = 1
 
-        # flag for newly added tiles
-        self.new = True
-        # flag for showing tile
-        self.show = True
+        # visibility flag for tile
+        self.show = not arising
 
 
 # --- Tiles -------------------------------------------------------------------
@@ -122,7 +116,7 @@ class Tiles:
         """
 
         result = [
-            self._precalculate_function(i / self.fpp_arising, 0.2)
+            self._precalculate_function(i / self.fpp_arising, 0.5)
             for i in range(self.fpp_arising)
         ]
 
@@ -135,9 +129,9 @@ class Tiles:
         for index, tile in enumerate(self.tiles):
             if tile.row_to == row and tile.col_to == col:
                 return index
-        # second we search in the current ('_from') tile-attributes
+        # second we search in the current tile-attributes
         for index, tile in enumerate(self.tiles):
-            if tile.row_from == row and tile.col_from == col:
+            if tile.row == row and tile.col == col:
                 return index
         # otherwise it's an exception
         raise LookupError(f"Can't find any tile on position: {row=}, {col=}")
@@ -154,17 +148,13 @@ class Tiles:
     def set_value(self, row: int, col: int, value: int):
         self.tiles[self._find_index(row, col)].value = value
 
-    def copy_from_matrix(self, matrix):
-        for row in range(self.rows):
-            for col in range(self.cols):
-                if matrix[row, col]:
-                    self.tiles.append(Tile(row, col, matrix[row, col]))
-
     def new_tile(self, row: int, col: int, value: int):
         self.tiles.append(Tile(row, col, value))
+        self._actualize_coords(len(self.tiles) - 1)
 
     def arise_tile(self, row: int, col: int, value: int):
         self.tiles.append(Tile(row, col, value, arising=True))
+        self._actualize_coords(len(self.tiles) - 1)
 
     def move_tile(self, row: int, col: int, row_to: int, col_to: int):
         index = self._find_index(row, col)
@@ -172,14 +162,24 @@ class Tiles:
         self.tiles[index].col_to = col_to
         self.tiles[index].moving = True
 
+    def copy_from_matrix(self, matrix):
+        self.tiles.clear()
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if matrix[row, col]:
+                    self.new_tile(row, col, matrix[row, col])
+
+    def set_move(self, move: MOVE):
+        self.move = move
+
     def reverse(self):
         for tile in self.tiles:
-            tile.col_from = (self.cols - 1) - tile.col_from
+            tile.col = (self.cols - 1) - tile.col
             tile.col_to = (self.cols - 1) - tile.col_to
 
     def transpose(self):
         for tile in self.tiles:
-            tile.row_from, tile.col_from = tile.col_from, tile.row_from
+            tile.row, tile.col = tile.col, tile.row
             tile.row_to, tile.col_to = tile.col_to, tile.row_to
 
     # --- Animation methods ---------------------------------------------------
@@ -197,15 +197,15 @@ class Tiles:
 
     def _actualize_coords(self, index: int):
         """
-        Calculating coords [x, y] for the tile
+        Calculating coords [x, y] for the tile by index
         according to it's row & column.
         """
         self.tiles[index].x = self.tiles[index].x_from = \
             GRID.X_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
-            self.tiles[index].col_from * (TILE.SIZE + TILE.PADDING)
+            self.tiles[index].col * (TILE.SIZE + TILE.PADDING)
         self.tiles[index].y = self.tiles[index].y_from = \
             GRID.Y_TOP_LEFT + TILE.PADDING + TILE.SIZE // 2 + \
-            self.tiles[index].row_from * (TILE.SIZE + TILE.PADDING)
+            self.tiles[index].row * (TILE.SIZE + TILE.PADDING)
 
     def _finish_moving(self):
         """
@@ -214,39 +214,36 @@ class Tiles:
         """
 
         for index, tile in enumerate(self.tiles):
-            if not tile.new:
 
-                if tile.moving:
-                    # actualizing cells in the grid for the tile
-                    tile.row_from = tile.row_to
-                    tile.col_from = tile.col_to
-                    tile.distance = 0
+            if tile.moving:
+                # actualizing cells in the grid for the tile
+                tile.row = tile.row_to
+                tile.col = tile.col_to
+                tile.distance = 0
 
-                    self._actualize_coords(index)
+                self._actualize_coords(index)
 
-                    # disabling moving flag once it is done
-                    tile.moving = False
+                # disabling moving flag once it is done
+                tile.moving = False
 
-                # restoring visibility for arising tiles
-                if tile.arising:
-                    tile.show = True
-                    tile.scale = 0
+            # restoring visibility for arising tiles
+            if tile.arising:
+                tile.show = True
+                tile.scale = 0
 
         # looking for overlapping tiles,
         # which always should be under arising tiles
         overlapping_cells: list[tuple[int, int]] = []
         for tile in self.tiles:
-            if not tile.new:
-                if tile.arising:
-                    overlapping_cells.append((tile.row_from, tile.col_from))
+            if tile.arising:
+                overlapping_cells.append((tile.row, tile.col))
 
         # retrieving indexes of overlapping tiles to delete
         overlapping_indexes: list[int] = []
         for index, tile in enumerate(self.tiles):
-            if not tile.new:
-                if not tile.arising:
-                    if (tile.row_from, tile.col_from) in overlapping_cells:
-                        overlapping_indexes.append(index)
+            if not tile.arising:
+                if (tile.row, tile.col) in overlapping_cells:
+                    overlapping_indexes.append(index)
         overlapping_indexes.reverse()
 
         # deleting overlapping tiles by indexes
@@ -262,43 +259,28 @@ class Tiles:
 
         # Step 2: finalizing other attributes
         for tile in self.tiles:
-            if not tile.new:
-                if tile.arising:
-                    tile.scale = 1
-                    # disabling arising flag once it is done
-                    tile.arising = False
+            if tile.arising:
+                tile.scale = 1
+                # disabling arising flag once it is done
+                tile.arising = False
 
-    def start_animation(self, move: MOVE):
+    def start_animation(self):
         """Starting new animation procedure."""
 
-        # Step 1: interruption of any previous animation
-        if self.phase is not PHASE.FINISH:
-            self._finish_moving()
-            self._finish_arising()
         self._reset_phase()
-        for tile in self.tiles:
-            tile.new = False
 
-        # Step 2: starting new animation
-        self.move = move
-
-        # preparation of all the graphics attributes for tiles
         for index, tile in enumerate(self.tiles):
-
-            # during moving phase we do show arising tiles
-            if tile.arising:
-                tile.show = False
 
             # calculating distances for moving tiles
             if tile.moving:
                 if self.move == MOVE.UP:
-                    tile.distance = tile.row_from - tile.row_to
+                    tile.distance = tile.row - tile.row_to
                 elif self.move == MOVE.DOWN:
-                    tile.distance = tile.row_to - tile.row_from
+                    tile.distance = tile.row_to - tile.row
                 elif self.move == MOVE.RIGHT:
-                    tile.distance = tile.col_to - tile.col_from
+                    tile.distance = tile.col_to - tile.col
                 elif self.move == MOVE.LEFT:
-                    tile.distance = tile.col_from - tile.col_to
+                    tile.distance = tile.col - tile.col_to
                 else:
                     raise ValueError(f"Unexpected move value: {self.move}")
 

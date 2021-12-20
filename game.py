@@ -162,6 +162,7 @@ class Game:
         if self.undo:
             if len(self.history_matrix):
                 self.matrix = self.history_matrix.pop()
+                self.tiles.copy_from_matrix(self.matrix)
                 self.stats = self.history_stats.pop()
                 return True
             else:
@@ -279,12 +280,9 @@ class Game:
             for col in range(cols):
                 if self.matrix[row, col]:
                     matrix_new[row, col_new] = self.matrix[row, col]
-
                     if col_new != col:
                         self.tiles.move_tile(row, col, row, col_new)
-
                         done = True
-
                     col_new += 1
 
         self.matrix = matrix_new
@@ -314,13 +312,8 @@ class Game:
                         self.matrix[row, col] == self.matrix[row, col + 1]:
                     self.matrix[row, col] += 1
                     self.matrix[row, col + 1] = 0
-
                     self.tiles.move_tile(row, col + 1, row, col)
-                    self.tiles.arise_tile(
-                        row, col,
-                        self.tiles.get_value(row, col) + 1
-                    )
-
+                    self.tiles.arise_tile(row, col, self.matrix[row, col])
                     done = True
 
                     self.stats.score_incremental += 2 ** int(self.matrix[row, col])
@@ -372,7 +365,8 @@ class Game:
         # Step 1: preparation to the move
         backup_matrix = copy(self.matrix)
         backup_stats = copy(self.stats)
-
+        self.tiles.copy_from_matrix(self.matrix)
+        self.tiles.set_move(move)
         done1 = done2 = done3 = 0
         self.stats.score_incremental = 0
 

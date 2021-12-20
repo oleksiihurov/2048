@@ -94,7 +94,7 @@ class Demo:
             self.gui.update_score(self.game.stats.score)
             self.game.generate_new_tile(self.game.choose_tile())
             if ANIMATION.IS_PRESENT:
-                self.game.tiles.start_animation(self.move)
+                self.game.tiles.start_animation()
             if GAME.UNDO:
                 self.gui.button_undo.show()
         else:
