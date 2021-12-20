@@ -8,6 +8,7 @@
 Logic, primary purpose and calculations.
 """
 
+
 # System imports
 from collections import deque
 from copy import copy
@@ -368,7 +369,7 @@ class Logic:
         backup_stats = copy(self.stats)
         self.tiles.copy_from_matrix(self.matrix)
         self.tiles.set_move(move)
-        done1 = done2 = done3 = 0
+        done1 = done2 = done3 = False
         self.stats.score_incremental = 0
 
         # Step 2: orientation of the matrix before the move

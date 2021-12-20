@@ -5,8 +5,7 @@
 
 """
 (IV) Output level abstraction.
-Presentation, graphics & user interface,
-provided by pygame & pygame_gui external modules.
+Presentation, graphics & UI, provided by pygame & pygame_gui external modules.
 """
 
 

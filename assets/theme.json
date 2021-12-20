@@ -22,6 +22,12 @@
         }
     },
 
+    "panel_fader": {
+        "colours": {
+            "dark_bg": "#00000011"
+        }
+    },
+
     "label": {
         "colours": {
             "dark_bg": "#faf8ef00",
@@ -116,6 +122,31 @@
                 "normal_hovered": "0.2",
                 "hovered_normal": "0.2"
             }
+        }
+    },
+
+    "window": {
+        "colours": {
+            "dark_bg": "#faf8ef",
+            "normal_border": "#000000"
+        },
+        "misc": {
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "3",
+
+            "border_width": "1",
+            "shadow_width": "0",
+
+            "enable_title_bar": "1",
+            "enable_close_button": "0",
+            "title_bar_height": "20"
+        }
+    },
+
+    "window.#title_bar": {
+        "misc":
+        {
+            "text_horiz_alignment": "center"
         }
     }
 }

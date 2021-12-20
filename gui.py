@@ -156,3 +156,22 @@ class GUI:
             manager = self.manager,
             container = self.panel
         )
+
+    def create_confirmation_dialog(self):
+
+        self.panel_fader = pgui.elements.UIPanel(
+            relative_rect = pg.Rect(
+                SCREEN.X_TOP_LEFT, SCREEN.Y_TOP_LEFT,
+                SCREEN.WIDTH, SCREEN.HEIGHT
+            ),
+            starting_layer_height = 4,
+            manager = self.manager,
+            margins = self.panel_margins,
+            object_id = 'panel_fader'
+        )
+
+        self.confirmation_dialog = pgui.windows.UIConfirmationDialog(
+            rect = pg.Rect(0, 0, 360, 200),
+            manager = self.manager,
+            action_long_desc = 'Do you really want to start new game?'
+        )
