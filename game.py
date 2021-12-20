@@ -7,6 +7,7 @@ import numpy as np
 
 # Project imports
 from config import MOVE
+from stats import Stats
 from tiles import Tiles
 
 # --- Constants and Additional classes ----------------------------------------
@@ -18,20 +19,6 @@ MAX_POWER = 32
 # appropriate numpy dtype enough for a power of that value
 # default value: np.uint16 = 2 bytes
 MAX_POWER_TYPE = np.uint16
-
-
-class Stats:
-    """Game statistics."""
-
-    def __init__(self, rows: int, cols: int):
-        self.score = 0
-        self.score_incremental = 0
-        self.move = {move: 0 for move in MOVE}
-        self.moves_idle = 0
-        self.merge = {i + 2: 0 for i in range(rows * cols + 1)}
-
-    def reset(self, rows: int, cols: int):
-        self.__init__(rows, cols)
 
 
 # --- Game class --------------------------------------------------------------
@@ -107,6 +94,9 @@ class Game:
             dtype = MAX_POWER_TYPE
         )
 
+    def clear_tiles(self):
+        self.tiles.clear_tiles()
+
     def clear_stats(self):
         """Erasing game statistics."""
         self.stats.reset(self.rows, self.cols)
@@ -114,6 +104,7 @@ class Game:
     def new_game(self):
         """Initialize matrix with two new tiles in grid."""
         self.clear_matrix()
+        self.clear_tiles()
         self.clear_stats()
         self.clear_history()
         self.generate_new_tile()
@@ -226,19 +217,19 @@ class Game:
 
     # --- Operations over matrix methods  -------------------------------------
 
-    def reverse_matrix(self):
+    def flip_matrix(self):
         """
         Flip the matrix horizontally.
         """
-        #   ┌───┬───┬───┬───┐           ┌───┬───┬───┬───┐
-        #   │ 0 │ 1 │ 2 │ 3 │           │ 3 │ 2 │ 1 │ 0 │
-        #   ├───┼───┼───┼───┤           ├───┼───┼───┼───┤
-        #   │ 4 │ 5 │ 6 │ 7 │ reverse → │ 7 │ 6 │ 5 │ 4 │
-        #   ├───┼───┼───┼───┤           ├───┼───┼───┼───┤
-        #   │ 8 │ 9 │ 10│ 11│           │ 11│ 10│ 9 │ 8 │
-        #   └───┴───┴───┴───┘           └───┴───┴───┴───┘
+        #   ┌───┬───┬───┬───┐          ┌───┬───┬───┬───┐
+        #   │ 0 │ 1 │ 2 │ 3 │          │ 3 │ 2 │ 1 │ 0 │
+        #   ├───┼───┼───┼───┤          ├───┼───┼───┼───┤
+        #   │ 4 │ 5 │ 6 │ 7 │ fliplr → │ 7 │ 6 │ 5 │ 4 │
+        #   ├───┼───┼───┼───┤          ├───┼───┼───┼───┤
+        #   │ 8 │ 9 │ 10│ 11│          │ 11│ 10│ 9 │ 8 │
+        #   └───┴───┴───┴───┘          └───┴───┴───┴───┘
         self.matrix = np.fliplr(self.matrix)
-        self.tiles.reverse()
+        self.tiles.fliplr()
 
     def transpose_matrix(self):
         """
@@ -313,7 +304,7 @@ class Game:
                     self.matrix[row, col] += 1
                     self.matrix[row, col + 1] = 0
                     self.tiles.move_tile(row, col + 1, row, col)
-                    self.tiles.arise_tile(row, col, self.matrix[row, col])
+                    self.tiles.arise_tile(row, col, int(self.matrix[row, col]))
                     done = True
 
                     self.stats.score_incremental += 2 ** int(self.matrix[row, col])
@@ -323,9 +314,9 @@ class Game:
 
     # --- Moves performed by player -------------------------------------------
     # The way to do tiles movement is compress → merge → compress again.
-    # But before we have to orient matrix to universal position using reverse/transpose.
+    # But before we have to orient matrix to universal position using flip/transpose.
     # Reverse/transpose matrix operations should be performed in correct order.
-    # After all matrix have to be transposed/reversed back to original orientation.
+    # After all matrix have to be transposed/flipped back to original orientation.
 
     def up(self) -> MOVE:
         """
@@ -375,9 +366,9 @@ class Game:
             self.transpose_matrix()
         elif move == MOVE.DOWN:
             self.transpose_matrix()
-            self.reverse_matrix()
+            self.flip_matrix()
         elif move == MOVE.RIGHT:
-            self.reverse_matrix()
+            self.flip_matrix()
         elif move == MOVE.LEFT:
             pass  # no matrix transformations
 
@@ -393,10 +384,10 @@ class Game:
         if move == MOVE.UP:
             self.transpose_matrix()
         elif move == MOVE.DOWN:
-            self.reverse_matrix()
+            self.flip_matrix()
             self.transpose_matrix()
         elif move == MOVE.RIGHT:
-            self.reverse_matrix()
+            self.flip_matrix()
         elif move == MOVE.LEFT:
             pass  # no matrix transformations
 

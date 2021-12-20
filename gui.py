@@ -1,6 +1,5 @@
 # System imports
 from os import path
-import warnings
 
 # External imports
 import pygame as pg
@@ -9,6 +8,9 @@ import pygame_gui as pgui
 # Project imports
 from config import TILE, PANEL, SCREEN
 
+
+# to avoid annoying console warning message from pygame_gui module
+import warnings
 warnings.filterwarnings('ignore', 'Label Rect is too small for text')
 
 

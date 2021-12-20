@@ -115,38 +115,57 @@ class Tiles:
         needed for arising phase of animation, using specific function.
         """
 
-        result = [
+        scales = [
             self._precalculate_function(i / self.fpp_arising, 0.5)
             for i in range(self.fpp_arising)
         ]
 
-        return result
+        return scales
 
     # --- Operational methods -------------------------------------------------
 
-    def _find_index(self, row: int, col: int) -> int:
+    # def _find_index(self, row: int, col: int) -> int:
+    #     # first we search in the destination ('_to') tile-attributes
+    #     for index, tile in enumerate(self.tiles):
+    #         if tile.row_to == row and tile.col_to == col:
+    #             return index
+    #     # second we search in the current tile-attributes
+    #     for index, tile in enumerate(self.tiles):
+    #         if tile.row == row and tile.col == col:
+    #             return index
+    #     # otherwise it's an exception
+    #     raise LookupError(f"Can't find any tile on position: {row=}, {col=}")
+
+    def _find_indexes(self, row: int, col: int) -> list[int]:
+        result = []
         # first we search in the destination ('_to') tile-attributes
         for index, tile in enumerate(self.tiles):
             if tile.row_to == row and tile.col_to == col:
-                return index
-        # second we search in the current tile-attributes
-        for index, tile in enumerate(self.tiles):
-            if tile.row == row and tile.col == col:
-                return index
-        # otherwise it's an exception
-        raise LookupError(f"Can't find any tile on position: {row=}, {col=}")
+                result.append(index)
+        if not result:
+            # second we search in the current tile-attributes
+            for index, tile in enumerate(self.tiles):
+                if tile.row == row and tile.col == col:
+                    result.append(index)
+        if not result:
+            # if we didn't found anything - it's an exception
+            raise LookupError(f"Can't find any tile on position: {row=}, {col=}")
+        return result
 
-    def get_tile(self, row: int, col: int) -> Tile:
-        return self.tiles[self._find_index(row, col)]
+    # def get_tile(self, row: int, col: int) -> Tile:
+    #     return self.tiles[self._find_index(row, col)]
+    #
+    # def set_tile(self, row: int, col: int, tile: Tile):
+    #     self.tiles[self._find_index(row, col)] = tile
+    #
+    # def get_value(self, row: int, col: int) -> int:
+    #     return self.tiles[self._find_index(row, col)].value
+    #
+    # def set_value(self, row: int, col: int, value: int):
+    #     self.tiles[self._find_index(row, col)].value = value
 
-    def set_tile(self, row: int, col: int, tile: Tile):
-        self.tiles[self._find_index(row, col)] = tile
-
-    def get_value(self, row: int, col: int) -> int:
-        return self.tiles[self._find_index(row, col)].value
-
-    def set_value(self, row: int, col: int, value: int):
-        self.tiles[self._find_index(row, col)].value = value
+    def clear_tiles(self):
+        self.tiles.clear()
 
     def new_tile(self, row: int, col: int, value: int):
         self.tiles.append(Tile(row, col, value))
@@ -154,30 +173,31 @@ class Tiles:
 
     def arise_tile(self, row: int, col: int, value: int):
         self.tiles.append(Tile(row, col, value, arising=True))
-        self._actualize_coords(len(self.tiles) - 1)
 
     def move_tile(self, row: int, col: int, row_to: int, col_to: int):
-        index = self._find_index(row, col)
-        self.tiles[index].row_to = row_to
-        self.tiles[index].col_to = col_to
-        self.tiles[index].moving = True
+        indexes = self._find_indexes(row, col)
+        for index in indexes:
+            self.tiles[index].row_to = row_to
+            self.tiles[index].col_to = col_to
+            self.tiles[index].moving = True
 
     def copy_from_matrix(self, matrix):
-        self.tiles.clear()
+        self.clear_tiles()
         for row in range(self.rows):
             for col in range(self.cols):
                 if matrix[row, col]:
-                    self.new_tile(row, col, matrix[row, col])
+                    self.new_tile(row, col, int(matrix[row, col]))
 
     def set_move(self, move: MOVE):
         self.move = move
 
-    def reverse(self):
+    def fliplr(self):
         for tile in self.tiles:
             tile.col = (self.cols - 1) - tile.col
             tile.col_to = (self.cols - 1) - tile.col_to
 
     def transpose(self):
+        self.rows, self.cols = self.cols, self.rows
         for tile in self.tiles:
             tile.row, tile.col = tile.col, tile.row
             tile.row_to, tile.col_to = tile.col_to, tile.row_to

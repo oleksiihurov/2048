@@ -4,7 +4,7 @@ import pygame as pg
 import pygame_gui as pgui
 
 # Project imports
-from config import GAME, SCREEN, ANIMATION, MOVE
+from config import GAME, PANEL, SCREEN, ANIMATION, MOVE
 from game import Game
 from graphics import Graphics
 from gui import GUI
@@ -25,6 +25,8 @@ class Demo:
         self.game = Game(GAME)
         self.graphics = Graphics(SCREEN.RESOLUTION)
         self.gui = GUI(self.graphics.screen)
+
+    # --- Handle methods ------------------------------------------------------
 
     def loop_handler(self):
         """Resetting flags. Ticking internal clock by FPS."""
@@ -59,23 +61,15 @@ class Demo:
                 if event.key == pg.K_LEFT:
                     self.move = self.game.left()
                 if event.key == pg.K_BACKSPACE:
-                    self.game.pop_from_history()
-                    self.gui.update_score(self.game.stats.score)
-                    if not self.game.is_history_there():
-                        self.gui.button_undo.hide()
+                    self._event_undo()
 
             # events from GUI
             if event.type == pg.USEREVENT:
                 if event.user_type == pgui.UI_BUTTON_PRESSED:
                     if event.ui_element == self.gui.button_new_game:
-                        self.game.new_game()
-                        self.gui.update_score(self.game.stats.score)
-                        self.gui.button_undo.hide()
+                        self._event_new_game()
                     if event.ui_element == self.gui.button_undo:
-                        self.game.pop_from_history()
-                        self.gui.update_score(self.game.stats.score)
-                        if not self.game.is_history_there():
-                            self.gui.button_undo.hide()
+                        self._event_undo()
 
             self.gui.manager.process_events(event)
         self.gui.manager.update(self.graphics.time_delta)
@@ -91,11 +85,12 @@ class Demo:
         # }.get(np.random.randint(4))()
 
         if self.move is not MOVE.NONE:
-            self.gui.update_score(self.game.stats.score)
+            if PANEL.IS_PRESENT:
+                self.gui.update_score(self.game.stats.score)
             self.game.generate_new_tile(self.game.choose_tile())
             if ANIMATION.IS_PRESENT:
                 self.game.tiles.start_animation()
-            if GAME.UNDO:
+            if PANEL.IS_PRESENT and GAME.UNDO:
                 self.gui.button_undo.show()
         else:
             if ANIMATION.IS_PRESENT:
@@ -113,3 +108,18 @@ class Demo:
         else:
             self.graphics.draw_grid(self.game.matrix)
         self.graphics.show()
+
+    # --- Other methods -------------------------------------------------------
+
+    def _event_undo(self):
+        self.game.pop_from_history()
+        if PANEL.IS_PRESENT:
+            self.gui.update_score(self.game.stats.score)
+            if not self.game.is_history_there():
+                self.gui.button_undo.hide()
+
+    def _event_new_game(self):
+        self.game.new_game()
+        if PANEL.IS_PRESENT:
+            self.gui.update_score(self.game.stats.score)
+            self.gui.button_undo.hide()
