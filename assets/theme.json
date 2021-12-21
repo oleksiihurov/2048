@@ -24,7 +24,7 @@
 
     "panel_fader": {
         "colours": {
-            "dark_bg": "#00000011"
+            "dark_bg": "#00000033"
         }
     },
 
@@ -134,12 +134,12 @@
             "shape": "rounded_rectangle",
             "shape_corner_radius": "3",
 
-            "border_width": "1",
+            "border_width": "0",
             "shadow_width": "0",
 
-            "enable_title_bar": "1",
+            "enable_title_bar": "0",
             "enable_close_button": "0",
-            "title_bar_height": "20"
+            "title_bar_height": "30"
         }
     },
 
@@ -147,6 +147,38 @@
         "misc":
         {
             "text_horiz_alignment": "center"
+        }
+    },
+
+    "text_box": {
+        "colours": {
+            "dark_bg": "#faf8ef",
+            "normal_text": "#776e65",
+            "normal_border": "#000000",
+            "link_text":     "#000000",
+            "link_hover":    "#000000",
+            "link_selected": "#000000"
+        },
+        "font": {
+            "name": "ClearSansBold",
+            "size": "20",
+            "regular_path": "assets/ClearSansBold.ttf"
+        },
+        "misc": {
+            "border_width": "0",
+            "padding": "76,44",
+            "link_normal_underline": "0",
+            "link_hover_underline": "1"
+        }
+    },
+    "text_box.vertical_scroll_bar": {
+        "colours": {
+            "dark_bg": "#faf8ef"
+        }
+    },
+    "text_box.vertical_scroll_bar.#sliding_button": {
+        "misc": {
+            "border_width": "0"
         }
     }
 }

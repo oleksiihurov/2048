@@ -30,6 +30,7 @@ class Demo:
         # Setup process
         self.is_running = True  # running main program flag
         self.is_mousemotion = False  # flag of the mouse pointer movement event
+        self.is_pause = False  # flag for pause in random self-gaming process
         self.move = MOVE.NONE
 
         # Setup graphics
@@ -71,6 +72,8 @@ class Demo:
                     self.move = self.logic.right()
                 if event.key == pg.K_LEFT:
                     self.move = self.logic.left()
+                if event.key == pg.K_SPACE:
+                    self.is_pause = not self.is_pause
                 if event.key == pg.K_BACKSPACE:
                     self._event_undo()
 
@@ -88,12 +91,13 @@ class Demo:
     def actions_handler(self):
         """Program actions in the main loop."""
 
-        # self.move = {
-        #     0: self.logic.up,
-        #     1: self.logic.down,
-        #     2: self.logic.right,
-        #     3: self.logic.left,
-        # }.get(np.random.randint(4))()
+        # if not self.is_pause:
+        #     self.move = {
+        #         0: self.logic.up,
+        #         1: self.logic.down,
+        #         2: self.logic.right,
+        #         3: self.logic.left,
+        #     }.get(np.random.randint(4))()
 
         if self.move is not MOVE.NONE:
             if PANEL.IS_PRESENT:
