@@ -4,8 +4,8 @@
 # -----------------------------------------------------------------------------
 
 """
-(II) Data level abstraction.
-Data structures and interfaces.
+(III) Logic level abstraction.
+Logic, primary purpose and calculations.
 """
 
 
